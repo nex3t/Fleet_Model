@@ -1099,19 +1099,87 @@ if active_tab == "🔩 Component Exposure":
         "Facility Data & Analytics Platform":     0.02,
     }
 
-    @st.cache_data(show_spinner=False)
-    def _load_component_configs():
-        fleet_df = pd.read_excel(
-            "Optimization_Config_Fleet.xlsx", sheet_name="Components"
-        )
-        fac_raw  = pd.read_excel(
-            "Optimization_Config_Facilities.xlsx", sheet_name="Components", header=1
-        )
-        fac_raw.columns = ["Component", "Domain", "Pct_of_Facility_Cost"]
-        fac_df = fac_raw[["Component", "Domain", "Pct_of_Facility_Cost"]].copy()
-        return fleet_df, fac_df
+    fleet_cfg = pd.DataFrame([
+        {"Component": "Vehicle Acquisition/Lease",       "Domain": "Vehicles & Equipment", "Pct_of_Fleet_Cost": 0.1800},
+        {"Component": "Vehicle Upfitting/Configuration", "Domain": "Vehicles & Equipment", "Pct_of_Fleet_Cost": 0.0400},
+        {"Component": "Scheduled Maintenance",           "Domain": "Vehicles & Equipment", "Pct_of_Fleet_Cost": 0.0900},
+        {"Component": "Unscheduled Repairs",             "Domain": "Vehicles & Equipment", "Pct_of_Fleet_Cost": 0.0700},
+        {"Component": "Tires & Consumables",             "Domain": "Vehicles & Equipment", "Pct_of_Fleet_Cost": 0.0350},
+        {"Component": "Fuel/Energy",                     "Domain": "Vehicles & Equipment", "Pct_of_Fleet_Cost": 0.1200},
+        {"Component": "Depreciation/Residual Value",     "Domain": "Vehicles & Equipment", "Pct_of_Fleet_Cost": 0.0450},
+        {"Component": "Remarketing/Disposal",            "Domain": "Vehicles & Equipment", "Pct_of_Fleet_Cost": 0.0200},
+        {"Component": "Fleet Management Platform (FMS)", "Domain": "Fleet Operations",     "Pct_of_Fleet_Cost": 0.027446},
+        {"Component": "Telematics/GPS Tracking",         "Domain": "Fleet Operations",     "Pct_of_Fleet_Cost": 0.022363},
+        {"Component": "Driver Management & Training",    "Domain": "Fleet Operations",     "Pct_of_Fleet_Cost": 0.020330},
+        {"Component": "Insurance & Risk Management",     "Domain": "Fleet Operations",     "Pct_of_Fleet_Cost": 0.038628},
+        {"Component": "Registration & Title Management", "Domain": "Fleet Operations",     "Pct_of_Fleet_Cost": 0.009149},
+        {"Component": "Compliance & Regulatory",         "Domain": "Fleet Operations",     "Pct_of_Fleet_Cost": 0.013215},
+        {"Component": "Toll Management",                 "Domain": "Fleet Operations",     "Pct_of_Fleet_Cost": 0.006607},
+        {"Component": "Accident Management",             "Domain": "Fleet Operations",     "Pct_of_Fleet_Cost": 0.016264},
+        {"Component": "Roadside Assistance",             "Domain": "Fleet Operations",     "Pct_of_Fleet_Cost": 0.011182},
+        {"Component": "Motor Pool / Shared Use Coordination", "Domain": "Fleet Operations","Pct_of_Fleet_Cost": 0.013215},
+        {"Component": "Fuel Card Administration",        "Domain": "Fleet Operations",     "Pct_of_Fleet_Cost": 0.008640},
+        {"Component": "Preventive Maintenance Scheduling","Domain": "Fleet Operations",    "Pct_of_Fleet_Cost": 0.022363},
+        {"Component": "Parts Inventory Management",      "Domain": "Fleet Operations",     "Pct_of_Fleet_Cost": 0.016264},
+        {"Component": "Vendor/Supplier Management",      "Domain": "Fleet Operations",     "Pct_of_Fleet_Cost": 0.013215},
+        {"Component": "Fleet Rightsizing Analytics",     "Domain": "Fleet Operations",     "Pct_of_Fleet_Cost": 0.011182},
+        {"Component": "Lifecycle Replacement Planning",  "Domain": "Fleet Operations",     "Pct_of_Fleet_Cost": 0.016264},
+        {"Component": "Environmental/Emissions Compliance","Domain": "Fleet Operations",   "Pct_of_Fleet_Cost": 0.008640},
+        {"Component": "EV Charging Infrastructure",      "Domain": "Fleet Operations",     "Pct_of_Fleet_Cost": 0.013215},
+        {"Component": "Route Optimization",              "Domain": "Fleet Operations",     "Pct_of_Fleet_Cost": 0.016264},
+        {"Component": "Utilization Tracking & Reporting","Domain": "Fleet Operations",     "Pct_of_Fleet_Cost": 0.011182},
+        {"Component": "Capital Planning & Budgeting",    "Domain": "Fleet Operations",     "Pct_of_Fleet_Cost": 0.013215},
+        {"Component": "Warranty Management",             "Domain": "Fleet Operations",     "Pct_of_Fleet_Cost": 0.008640},
+        {"Component": "Driver Safety & MVR Monitoring",  "Domain": "Fleet Operations",     "Pct_of_Fleet_Cost": 0.011182},
+        {"Component": "Mobile Workforce Coordination",   "Domain": "Fleet Operations",     "Pct_of_Fleet_Cost": 0.011182},
+        {"Component": "Fleet Procurement/Sourcing",      "Domain": "Fleet Operations",     "Pct_of_Fleet_Cost": 0.013215},
+        {"Component": "Parking Management",              "Domain": "Fleet Operations",     "Pct_of_Fleet_Cost": 0.006607},
+        {"Component": "Vehicle Storage & Yard Management","Domain": "Fleet Operations",    "Pct_of_Fleet_Cost": 0.008640},
+        {"Component": "Fleet Data & Analytics Platform", "Domain": "Fleet Operations",     "Pct_of_Fleet_Cost": 0.011690},
+    ])
 
-    fleet_cfg, fac_cfg = _load_component_configs()
+    fac_cfg = pd.DataFrame([
+        {"Component": "HVAC Systems",                        "Domain": "Building Systems & Assets", "Pct_of_Facility_Cost": 0.1200},
+        {"Component": "Electrical Systems & Distribution",   "Domain": "Building Systems & Assets", "Pct_of_Facility_Cost": 0.0800},
+        {"Component": "Plumbing & Water Systems",            "Domain": "Building Systems & Assets", "Pct_of_Facility_Cost": 0.0550},
+        {"Component": "Roof & Building Envelope",            "Domain": "Building Systems & Assets", "Pct_of_Facility_Cost": 0.0750},
+        {"Component": "Fire Protection & Life Safety",       "Domain": "Building Systems & Assets", "Pct_of_Facility_Cost": 0.0500},
+        {"Component": "Elevators & Vertical Transport",      "Domain": "Building Systems & Assets", "Pct_of_Facility_Cost": 0.0350},
+        {"Component": "Structural Systems & Foundations",    "Domain": "Building Systems & Assets", "Pct_of_Facility_Cost": 0.0450},
+        {"Component": "Interior Finishes & Fixtures",        "Domain": "Building Systems & Assets", "Pct_of_Facility_Cost": 0.0350},
+        {"Component": "Parking Structures & Paving",         "Domain": "Building Systems & Assets", "Pct_of_Facility_Cost": 0.0250},
+        {"Component": "Building Automation Systems (BAS)",   "Domain": "Building Systems & Assets", "Pct_of_Facility_Cost": 0.0300},
+        {"Component": "Janitorial & Custodial Services",     "Domain": "Facilities Operations",     "Pct_of_Facility_Cost": 0.0525},
+        {"Component": "Grounds & Landscaping Maintenance",   "Domain": "Facilities Operations",     "Pct_of_Facility_Cost": 0.0178},
+        {"Component": "Preventive Maintenance Programs",     "Domain": "Facilities Operations",     "Pct_of_Facility_Cost": 0.0377},
+        {"Component": "Corrective/Reactive Maintenance",     "Domain": "Facilities Operations",     "Pct_of_Facility_Cost": 0.0476},
+        {"Component": "Energy Management & Utilities",       "Domain": "Facilities Operations",     "Pct_of_Facility_Cost": 0.0675},
+        {"Component": "Waste Management & Recycling",        "Domain": "Facilities Operations",     "Pct_of_Facility_Cost": 0.0119},
+        {"Component": "Pest Control",                        "Domain": "Facilities Operations",     "Pct_of_Facility_Cost": 0.0040},
+        {"Component": "Security Systems & Access Control",   "Domain": "Facilities Operations",     "Pct_of_Facility_Cost": 0.0218},
+        {"Component": "Guard Services & Monitoring",         "Domain": "Facilities Operations",     "Pct_of_Facility_Cost": 0.0307},
+        {"Component": "Space Planning & Move Management",    "Domain": "Facilities Operations",     "Pct_of_Facility_Cost": 0.0079},
+        {"Component": "CAFM/IWMS Platform",                  "Domain": "Facilities Operations",     "Pct_of_Facility_Cost": 0.0069},
+        {"Component": "Work Order Management",               "Domain": "Facilities Operations",     "Pct_of_Facility_Cost": 0.0099},
+        {"Component": "Capital Project Management",          "Domain": "Facilities Operations",     "Pct_of_Facility_Cost": 0.0198},
+        {"Component": "Lease Administration",                "Domain": "Facilities Operations",     "Pct_of_Facility_Cost": 0.0069},
+        {"Component": "Real Estate Tax & Insurance",         "Domain": "Facilities Operations",     "Pct_of_Facility_Cost": 0.0129},
+        {"Component": "Environmental Health & Safety (EHS)", "Domain": "Facilities Operations",     "Pct_of_Facility_Cost": 0.0099},
+        {"Component": "Indoor Air Quality Management",       "Domain": "Facilities Operations",     "Pct_of_Facility_Cost": 0.0069},
+        {"Component": "ADA/Accessibility Compliance",        "Domain": "Facilities Operations",     "Pct_of_Facility_Cost": 0.0059},
+        {"Component": "Hazardous Materials Management",      "Domain": "Facilities Operations",     "Pct_of_Facility_Cost": 0.0050},
+        {"Component": "Snow & Ice Removal",                  "Domain": "Facilities Operations",     "Pct_of_Facility_Cost": 0.0119},
+        {"Component": "Signage & Wayfinding",                "Domain": "Facilities Operations",     "Pct_of_Facility_Cost": 0.0030},
+        {"Component": "Mail & Package Services",             "Domain": "Facilities Operations",     "Pct_of_Facility_Cost": 0.0030},
+        {"Component": "Loading Dock Operations",             "Domain": "Facilities Operations",     "Pct_of_Facility_Cost": 0.0030},
+        {"Component": "Emergency Preparedness & Response",   "Domain": "Facilities Operations",     "Pct_of_Facility_Cost": 0.0079},
+        {"Component": "Sustainability & LEED Programs",      "Domain": "Facilities Operations",     "Pct_of_Facility_Cost": 0.0040},
+        {"Component": "Commissioning & Retro-Commissioning", "Domain": "Facilities Operations",     "Pct_of_Facility_Cost": 0.0050},
+        {"Component": "Condition Assessment & FCI",          "Domain": "Facilities Operations",     "Pct_of_Facility_Cost": 0.0069},
+        {"Component": "Deferred Maintenance Planning",       "Domain": "Facilities Operations",     "Pct_of_Facility_Cost": 0.0079},
+        {"Component": "Vendor/Contractor Management",        "Domain": "Facilities Operations",     "Pct_of_Facility_Cost": 0.0099},
+        {"Component": "Facility Data & Analytics Platform",  "Domain": "Facilities Operations",     "Pct_of_Facility_Cost": 0.0040},
+    ])
 
     # ── Controls ──────────────────────────────────────────────────────────────
     comp_yr    = focus_year
