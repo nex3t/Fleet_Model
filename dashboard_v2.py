@@ -77,6 +77,11 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+st.markdown(
+    '<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">',
+    unsafe_allow_html=True,
+)
+
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -248,6 +253,12 @@ st.markdown("""
     button[title="View fullscreen"],
     [data-testid="stElementToolbar"],
     [data-testid="stElementToolbarButton"] { display: none !important; }
+
+    /* ── Hide sidebar collapse/expand buttons ── */
+    [data-testid="stSidebarCollapseButton"],
+    [data-testid="stSidebarHeader"],
+    [data-testid="collapsedControl"],
+    [data-testid="stSidebarCollapsedControl"] { display: none !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -2083,6 +2094,24 @@ if active_tab == "🛣️ Oil Price vs Roadways":
             long_run_eq=float(sb_lr), sigma=0.22,
             base_diesel_vol_gal=None, base_elec_M=last_bud_M,
         )
+        # Roadway projection: OLS trend extrapolation + oil passthrough
+        _RDWY_PASS     = 0.22
+        _PROJ_YRS_RDW  = [2027, 2028, 2029, 2030, 2031, 2032, 2033]
+
+        _bud_hist_y  = np.array(df_bud["YEAR"].tolist(), dtype=float)
+        _bud_hist_v  = np.array((df_bud["BUDGET"] / 1e6).tolist(), dtype=float)
+        _bud_slope, _bud_icept = np.polyfit(_bud_hist_y, _bud_hist_v, 1)
+        _bud_fitted  = _bud_slope * _bud_hist_y + _bud_icept
+        _bud_rmse_frac = float(np.sqrt(np.mean((_bud_hist_v - _bud_fitted) ** 2)) / np.mean(_bud_hist_v))
+        _bud_trend   = [_bud_slope * y + _bud_icept for y in _PROJ_YRS_RDW]
+
+        def _rdw_bud_proj(wti_ann):
+            return [round(t * (1 + _RDWY_PASS * (w - 72) / 72), 1) for t, w in zip(_bud_trend, wti_ann)]
+        def _rdw_bud_hi(wti_ann):
+            return [round(t * (1 + _RDWY_PASS * (w - 72) / 72) * (1 + _bud_rmse_frac), 1) for t, w in zip(_bud_trend, wti_ann)]
+        def _rdw_bud_lo(wti_ann):
+            return [round(max(0.0, t * (1 + _RDWY_PASS * (w - 72) / 72) * (1 - _bud_rmse_frac)), 1) for t, w in zip(_bud_trend, wti_ann)]
+
         oc_bud_chart = {
             **oc_rdw,
             "wti_dates":            [p[0] for p in _wti_pairs_rdw],
@@ -2094,6 +2123,9 @@ if active_tab == "🛣️ Oil Price vs Roadways":
             "diesel_est_2026_M":    None,
             "diesel_budget_2026_M": None,
             **scen_bud,
+            "elec_proj_base": _rdw_bud_proj(scen_bud["wti_proj_base"]),
+            "elec_proj_hi":   _rdw_bud_hi(scen_bud["wti_proj_hi"]),
+            "elec_proj_lo":   _rdw_bud_lo(scen_bud["wti_proj_lo"]),
         }
         st.plotly_chart(
             make_oil_cost_chart(
@@ -2235,6 +2267,20 @@ Passthrough: 0.15 (infrastructure materials oil component).
             long_run_eq=float(sb_lr), sigma=0.22,
             base_diesel_vol_gal=None, base_elec_M=last_act_M,
         )
+        _act_hist_y  = np.array(df_act["YEAR"].tolist(), dtype=float)
+        _act_hist_v  = np.array((df_act["ACTUALS"] / 1e6).tolist(), dtype=float)
+        _act_slope, _act_icept = np.polyfit(_act_hist_y, _act_hist_v, 1)
+        _act_fitted  = _act_slope * _act_hist_y + _act_icept
+        _act_rmse_frac = float(np.sqrt(np.mean((_act_hist_v - _act_fitted) ** 2)) / np.mean(_act_hist_v))
+        _act_trend   = [_act_slope * y + _act_icept for y in _PROJ_YRS_RDW]
+
+        def _rdw_act_proj(wti_ann):
+            return [round(t * (1 + _RDWY_PASS * (w - 72) / 72), 1) for t, w in zip(_act_trend, wti_ann)]
+        def _rdw_act_hi(wti_ann):
+            return [round(t * (1 + _RDWY_PASS * (w - 72) / 72) * (1 + _act_rmse_frac), 1) for t, w in zip(_act_trend, wti_ann)]
+        def _rdw_act_lo(wti_ann):
+            return [round(max(0.0, t * (1 + _RDWY_PASS * (w - 72) / 72) * (1 - _act_rmse_frac)), 1) for t, w in zip(_act_trend, wti_ann)]
+
         oc_act_chart = {
             **oc_rdw,
             "wti_dates":            [p[0] for p in _wti_pairs_rdw],
@@ -2246,6 +2292,9 @@ Passthrough: 0.15 (infrastructure materials oil component).
             "diesel_est_2026_M":    None,
             "diesel_budget_2026_M": None,
             **scen_act,
+            "elec_proj_base": _rdw_act_proj(scen_act["wti_proj_base"]),
+            "elec_proj_hi":   _rdw_act_hi(scen_act["wti_proj_hi"]),
+            "elec_proj_lo":   _rdw_act_lo(scen_act["wti_proj_lo"]),
         }
         st.plotly_chart(
             make_oil_cost_chart(
