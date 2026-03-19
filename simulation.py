@@ -607,7 +607,11 @@ def compute_oil_cost_correlation() -> dict:
     _bdf = _load_budget_annual()
     _bdf["Date"] = pd.to_datetime(_bdf["Fiscal_Year"].astype(str) + "-01-01")
 
-    diesel = _bdf[_bdf["Category"] == "Motor Vehicle Diesel Fuel"][["Date", "Amount"]].copy()
+    _fleet_cats = ["Motor Vehicle Diesel Fuel", "Motor Vehicle Gasoline", "Alternative Fuel"]
+    diesel = (
+        _bdf[_bdf["Category"].isin(_fleet_cats)]
+        .groupby("Date", as_index=False)["Amount"].sum()
+    )
     diesel["Diesel_M"] = (diesel["Amount"] / 1e6).round(2)
 
     elec = _bdf[_bdf["Category"] == "Electricity"][["Date", "Amount"]].copy()
@@ -651,8 +655,8 @@ def compute_oil_cost_correlation() -> dict:
     elec_est_2025_M  = _est_elec_M(wti_2025_avg, 1)
     elec_est_2026_M  = _est_elec_M(wti_2026_avg, 2)
 
-    # ── FY2026 estimated actual diesel spend (budget comparison — Tab 4) ──────
-    # Volume proxy from diesel-only budget (apples-to-apples with Tab 4)
+    # ── FY2026 estimated actual fleet fuel spend (budget comparison — Tab 4) ────
+    # Volume proxy from total fleet fuel budget (diesel + gasoline + alt fuel)
     BASE_VOL_GAL         = float(diesel["Amount"].iloc[-1]) / BASE_DIESEL_GAL
     diesel_price_2026    = BASE_DIESEL_GAL + (wti_2026_avg - 72) * CRUDE_TO_DIESEL
     diesel_est_2026_M    = round(BASE_VOL_GAL * diesel_price_2026 / 1e6, 2)
@@ -707,8 +711,8 @@ def compute_oil_cost_correlation() -> dict:
         np.maximum(_wti_interp * (1 - _band_sigma), 40), 1
     ).tolist()
 
-    # ── Diesel budget projections ─────────────────────────────────────────────
-    # Volume proxy: FY2026 budget / base diesel price per gal
+    # ── Fleet fuel budget projections (diesel + gasoline + alt fuel) ──────────
+    # Volume proxy: FY2026 total fleet fuel budget / base diesel price per gal
     BASE_VOL_GAL  = float(diesel["Amount"].iloc[-1]) / BASE_DIESEL_GAL
     def _diesel_proj(wti_vals):
         return [round(BASE_VOL_GAL * (BASE_DIESEL_GAL + (w - 72) * CRUDE_TO_DIESEL) / 1e6, 2)

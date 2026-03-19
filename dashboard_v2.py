@@ -17,6 +17,9 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
+from pathlib import Path
+
+_DASHBOARD_DIR = Path(__file__).parent
 
 from simulation import FleetSim, FacilitiesSim, compute_runchart_data, compute_oil_cost_correlation, generate_wti_forecast
 from charts import (
@@ -48,7 +51,7 @@ from config import SCENARIOS, FOCUS_YEARS, BASE_DIESEL_GAL, SCENARIO_COLORS
 # Note: FY2021 excludes ~$3.1M World Fuel Services residual (contract wind-down)
 # ── Actual energy spend dataset (Chicago Payments cleaned) ───────────────────
 
-ENERGY_SPEND_FILE = "chicago_energy_clean_strict.xlsx"
+ENERGY_SPEND_FILE = _DASHBOARD_DIR / "chicago_energy_clean_strict.xlsx"
 
 @st.cache_data
 def load_actual_energy():
@@ -83,7 +86,7 @@ st.markdown("""
     [data-testid="stAppViewContainer"],
     [data-testid="stMain"],
     [data-testid="stMain"] > div,
-    .main, .main > div { background-color: #080f1c !important; }
+    .main, .main > div { background-color: #f1f5f9 !important; }
 
     /* ── Block container ── */
     .block-container {
@@ -96,42 +99,43 @@ st.markdown("""
     }
 
     /* ── Global text ── */
-    p, span, li, td, th { color: #cbd5e1 !important; font-family: 'Inter', sans-serif !important; }
-    h1 { color: #38bdf8 !important; font-size: 1.5rem !important; font-weight: 700 !important; letter-spacing: -0.01em !important; }
-    h2 { color: #7dd3fc !important; font-size: 1.2rem !important; }
-    h3 { color: #bae6fd !important; font-size: 1.05rem !important; }
-    strong, b { color: #f1f5f9 !important; }
+    p, span, li, td, th { color: #334155 !important; font-family: 'Inter', sans-serif !important; }
+    h1 { color: #0f4c8a !important; font-size: 1.5rem !important; font-weight: 700 !important; letter-spacing: -0.01em !important; }
+    h2 { color: #1d6fb8 !important; font-size: 1.2rem !important; }
+    h3 { color: #1d4ed8 !important; font-size: 1.05rem !important; }
+    strong, b { color: #0f172a !important; }
 
     /* ══════════════════════════════════════════
        METRIC CARDS — border-left accent style
     ══════════════════════════════════════════ */
-    div[data-testid="metric-container"] {
-        background: #0d1b2e !important;
-        border: 1px solid #1e3a5f !important;
-        border-left: 3px solid #38bdf8 !important;
+    div[data-testid="metric-container"],
+    [data-testid="stMetric"] {
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        border-left: 3px solid #3b82f6 !important;
         border-radius: 8px !important;
         padding: 16px 20px !important;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.45) !important;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
         transition: box-shadow 0.2s ease !important;
     }
     div[data-testid="metric-container"]:hover {
-        box-shadow: 0 4px 18px rgba(56,189,248,0.12) !important;
+        box-shadow: 0 4px 14px rgba(59,130,246,0.10) !important;
     }
     div[data-testid="metric-container"] [data-testid="stMetricLabel"] p {
-        color: #94a3b8 !important;
+        color: #64748b !important;
         font-size: 0.78rem !important;
         text-transform: uppercase !important;
         letter-spacing: 0.05em !important;
         font-weight: 500 !important;
     }
     div[data-testid="metric-container"] [data-testid="stMetricValue"] {
-        color: #f1f5f9 !important;
+        color: #0f172a !important;
         font-size: 1.6rem !important;
         font-weight: 700 !important;
         letter-spacing: -0.02em !important;
     }
-    div[data-testid="metric-container"] [data-testid="stMetricDelta"]   { color: #fb923c !important; }
-    div[data-testid="metric-container"] [data-testid="stMetricDelta"] svg { color: #fb923c !important; }
+    div[data-testid="metric-container"] [data-testid="stMetricDelta"]   { color: #ea580c !important; }
+    div[data-testid="metric-container"] [data-testid="stMetricDelta"] svg { color: #ea580c !important; }
 
     /* ══════════════════════════════════════════
        PILLS NAV — top-right tab selector
@@ -153,9 +157,11 @@ st.markdown("""
     }
 
     /* Individual pill buttons */
-    [data-testid="stPills"] button {
-        background: transparent !important;
-        border: 1px solid #1e3a5f !important;
+    [data-testid="stPills"] button,
+    button[kind="pillsButton"],
+    button[data-testid="stPillsButton"] {
+        background: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
         border-radius: 20px !important;
         color: #64748b !important;
         font-family: 'Inter', sans-serif !important;
@@ -165,76 +171,79 @@ st.markdown("""
         white-space: nowrap !important;
         transition: all 0.15s ease !important;
     }
-    [data-testid="stPills"] button:hover {
-        background: rgba(56,189,248,0.08) !important;
-        border-color: #38bdf8 !important;
-        color: #bae6fd !important;
+    [data-testid="stPills"] button:hover,
+    button[kind="pillsButton"]:hover {
+        background: #eff6ff !important;
+        border-color: #3b82f6 !important;
+        color: #1d4ed8 !important;
     }
     [data-testid="stPills"] button[aria-selected="true"],
     [data-testid="stPills"] button[data-active="true"],
-    [data-testid="stPills"] button[kind="pillsActive"] {
-        background: #1e3a5f !important;
-        border-color: #38bdf8 !important;
-        color: #38bdf8 !important;
+    [data-testid="stPills"] button[kind="pillsActive"],
+    button[kind="pillsActive"],
+    button[aria-selected="true"][kind="pillsButton"] {
+        background: #dbeafe !important;
+        border-color: #3b82f6 !important;
+        color: #1d4ed8 !important;
         font-weight: 600 !important;
-        box-shadow: 0 0 0 1px rgba(56,189,248,0.25) !important;
+        box-shadow: 0 0 0 1px rgba(59,130,246,0.20) !important;
     }
 
     /* ── Sidebar ── */
     [data-testid="stSidebar"],
-    [data-testid="stSidebar"] > div { background-color: #0a1628 !important; border-right: 1px solid #1e3a5f !important; }
+    [data-testid="stSidebar"] > div { background-color: #ffffff !important; border-right: 1px solid #e2e8f0 !important; }
     [data-testid="stSidebar"] p,
     [data-testid="stSidebar"] span,
     [data-testid="stSidebar"] label,
-    [data-testid="stSidebar"] div { color: #cbd5e1 !important; font-family: 'Inter', sans-serif !important; }
+    [data-testid="stSidebar"] div { color: #334155 !important; font-family: 'Inter', sans-serif !important; }
     [data-testid="stSidebar"] h1,
     [data-testid="stSidebar"] h2,
-    [data-testid="stSidebar"] h3 { color: #38bdf8 !important; }
-    [data-testid="stSidebar"] [data-testid="stCaptionContainer"] { color: #64748b !important; }
+    [data-testid="stSidebar"] h3 { color: #0f4c8a !important; }
+    [data-testid="stSidebar"] [data-testid="stCaptionContainer"] { color: #94a3b8 !important; }
 
     /* ── Expander — defined card border ── */
     [data-testid="stExpander"] {
-        background: #0d1b2e !important;
-        border: 1px solid #1e3a5f !important;
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
         border-radius: 8px !important;
-        box-shadow: 0 1px 6px rgba(0,0,0,0.35) !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
     }
     [data-testid="stExpander"] summary,
-    [data-testid="stExpander"] summary p { color: #7dd3fc !important; font-weight: 500 !important; }
-    [data-testid="stExpander"] summary:hover p { color: #38bdf8 !important; }
+    [data-testid="stExpander"] summary p { color: #1d4ed8 !important; font-weight: 500 !important; }
+    [data-testid="stExpander"] summary:hover p { color: #1d6fb8 !important; }
 
     /* ── Selectbox ── */
     [data-testid="stSelectbox"] > div > div {
-        background: #0d1b2e !important;
-        border: 1px solid #1e3a5f !important;
-        color: #e2e8f0 !important;
+        background: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #1e293b !important;
         border-radius: 6px !important;
     }
-    [data-testid="stSelectbox"] span { color: #e2e8f0 !important; }
+    [data-testid="stSelectbox"] span { color: #1e293b !important; }
 
     /* ── Radio ── */
-    [data-testid="stRadio"] label { color: #cbd5e1 !important; }
-    [data-testid="stRadio"] [data-testid="stMarkdown"] p { color: #94a3b8 !important; }
+    [data-testid="stRadio"] label { color: #334155 !important; }
+    [data-testid="stRadio"] [data-testid="stMarkdown"] p { color: #64748b !important; }
 
     /* ── Slider ── */
     [data-testid="stSlider"] [data-testid="stTickBarMin"],
     [data-testid="stSlider"] [data-testid="stTickBarMax"] { color: #64748b !important; }
 
     /* ── Dataframes ── */
-    [data-testid="stDataFrame"] iframe { filter: invert(0.88) hue-rotate(180deg); border-radius: 8px; }
+    [data-testid="stDataFrame"] iframe { filter: none; border-radius: 8px; border: 1px solid #e2e8f0; }
 
     /* ── Dividers ── */
-    hr { border-color: #1e3a5f !important; margin: 1.2rem 0 !important; }
+    hr { border-color: #e2e8f0 !important; margin: 1.2rem 0 !important; }
 
     /* ── Scrollbar ── */
-    ::-webkit-scrollbar { width: 5px; background: #080f1c; }
-    ::-webkit-scrollbar-thumb { background: #1e3a5f; border-radius: 3px; }
+    ::-webkit-scrollbar { width: 5px; background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 
     /* ── Tab section label ── */
-    .tab-header { color: #7dd3fc !important; font-size: 1.0rem !important; font-weight: 600 !important; margin-bottom: 0.3rem !important; }
+    .tab-header { color: #1d4ed8 !important; font-size: 1.0rem !important; font-weight: 600 !important; margin-bottom: 0.3rem !important; }
 
     /* ── Spinner ── */
-    [data-testid="stSpinner"] p { color: #94a3b8 !important; }
+    [data-testid="stSpinner"] p { color: #64748b !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -267,7 +276,7 @@ def get_tables():
 fleet_det, fleet_mc, fleet_cs, fleet_hist, fleet_comp, fac_det, fac_mc, fac_cs = get_tables()
 
 # ── Top-level energy budget helpers (shared by Exec Summary + Oil Price vs) ──
-_ENERGY_BUDGET_FILE = "chicago_energy_budget_2016_2025.xlsx"
+_ENERGY_BUDGET_FILE = _DASHBOARD_DIR / "chicago_energy_budget_2016_2025.xlsx"
 _ACCT_CLEAN = {
     "MOTOR VEHICLE DIESEL FUEL": "Motor Vehicle Diesel Fuel",
     "MOTOR VEHL DIESEL FUEL":    "Motor Vehicle Diesel Fuel",
@@ -299,6 +308,76 @@ def load_budget_df():
 @st.cache_data(show_spinner=False, ttl=3600)
 def load_oil_correlation():
     return compute_oil_cost_correlation()
+
+
+@st.cache_data
+def load_energy_spend():
+    """
+    Reads chicago_energy_clean_strict.xlsx sheet summary_by_year.
+    Returns (fuel_df, elec_df) each with columns: year, value_M.
+    """
+    df = pd.read_excel(ENERGY_SPEND_FILE, sheet_name="summary_by_year")
+    df.columns = ["year", "type", "category", "total_spend"]
+    df["value_M"] = df["total_spend"] / 1e6
+    fuel = df[df["type"] == "fuel"].copy().sort_values("year")
+    elec = df[df["type"] == "electricity"].copy().sort_values("year")
+    fuel = fuel.groupby("year", as_index=False)["value_M"].sum()
+    elec = elec.groupby("year", as_index=False)["value_M"].sum()
+    return fuel, elec
+
+
+@st.cache_data
+def load_vendor_detail():
+    """Reads vendor_level sheet for vendor-level spend breakdown."""
+    df = pd.read_excel(ENERGY_SPEND_FILE, sheet_name="vendor_level")
+    df.columns = ["vendor", "type", "category", "year", "total_spend"]
+    df["value_M"] = df["total_spend"] / 1e6
+    return df
+
+
+_CDOT_ROADWAY_FILE = _DASHBOARD_DIR / "CDOT_Roadway_Actuals_and_Budget_v3.xlsx"
+
+@st.cache_data
+def load_cdot_roadway():
+    """
+    Load CDOT roadway data from CDOT_Roadway_Actuals_and_Budget_v3.xlsx.
+    Returns (df_avb, df_act_wt, df_bud_wt, df_vendor):
+      df_avb     — actuals vs budget by year (YEAR, ACTUALS, BUDGET, VARIANCE, VARIANCE_PCT)
+      df_act_wt  — actual spend by work type (YEAR, TYPE, TOTAL_SPEND)
+      df_bud_wt  — budget by work type (YEAR, TYPE, TOTAL_BUDGET)
+      df_vendor  — vendor-level actual payments (VENDOR, TYPE, CATEGORY, YEAR, TOTAL_SPEND, value_M)
+    """
+    def _clean(df, col_names, key="YEAR"):
+        df = df.iloc[1:].reset_index(drop=True)
+        df.columns = col_names
+        df = df.dropna(subset=[key])
+        df[key] = df[key].astype(int)
+        return df
+
+    # actuals vs budget
+    raw = pd.read_excel(_CDOT_ROADWAY_FILE, sheet_name="actuals_vs_budget", header=1)
+    df_avb = _clean(raw, ["YEAR","CATEGORY","ACTUALS","BUDGET","VARIANCE","VARIANCE_PCT"])
+    for c in ["ACTUALS","BUDGET","VARIANCE","VARIANCE_PCT"]:
+        df_avb[c] = pd.to_numeric(df_avb[c], errors="coerce").fillna(0)
+    df_avb = df_avb.sort_values("YEAR").reset_index(drop=True)
+
+    # actual spend by work type
+    raw2 = pd.read_excel(_CDOT_ROADWAY_FILE, sheet_name="summary_by_year", header=1)
+    df_act_wt = _clean(raw2, ["YEAR","TYPE","CATEGORY","TOTAL_SPEND"])
+    df_act_wt["TOTAL_SPEND"] = pd.to_numeric(df_act_wt["TOTAL_SPEND"], errors="coerce").fillna(0)
+
+    # budget by work type
+    raw3 = pd.read_excel(_CDOT_ROADWAY_FILE, sheet_name="budget_summary_by_year", header=1)
+    df_bud_wt = _clean(raw3, ["YEAR","TYPE","CATEGORY","TOTAL_BUDGET"])
+    df_bud_wt["TOTAL_BUDGET"] = pd.to_numeric(df_bud_wt["TOTAL_BUDGET"], errors="coerce").fillna(0)
+
+    # vendor level
+    raw4 = pd.read_excel(_CDOT_ROADWAY_FILE, sheet_name="vendor_level", header=1)
+    df_vendor = _clean(raw4, ["VENDOR","TYPE","CATEGORY","YEAR","TOTAL_SPEND"], key="YEAR")
+    df_vendor["TOTAL_SPEND"] = pd.to_numeric(df_vendor["TOTAL_SPEND"], errors="coerce").fillna(0)
+    df_vendor["value_M"]     = df_vendor["TOTAL_SPEND"] / 1e6
+
+    return df_avb, df_act_wt, df_bud_wt, df_vendor
 
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
@@ -386,9 +465,9 @@ kpis = _get_combined_kpis(focus_year)
 # ── Header: title left, pill nav top-right ────────────────────────────────────
 TAB_OPTIONS = [
     "📋 Executive Summary",
-    "🛢️ Oil Price vs",
-    "⚡ Fuel Price Sensitivity",
-    "📊 Budget Scenarios",
+    "🛢️ Oil Price vs Fleet",
+    "🏢 Oil Price vs Facilities",
+    "🛣️ Oil Price vs Roadways",
     "🔩 Component Exposure",
 ]
 
@@ -403,31 +482,6 @@ with _hdr_r:
         label_visibility="collapsed",
     )
 
-# KPI cards below header — only shown for sensitivity and budget scenario tabs
-if active_tab in ("⚡ Fuel Price Sensitivity", "📊 Budget Scenarios"):
-    c1, c2, c3, c4 = st.columns(4)
-    with c1:
-        st.metric("Combined Base Cost", f"${kpis['combined_base']:.0f}M",
-                  help="Fleet (det) + Facilities (optimized baseline), no shock")
-    with c2:
-        _mild_pct = kpis['mild_delta'] / kpis['combined_base'] * 100
-        st.metric("Mild Shock (+25%)",
-                  f"+${kpis['mild_delta']:.1f}M  (+{_mild_pct:.1f}%)",
-                  delta="vs base cost",
-                  delta_color="inverse")
-    with c3:
-        _sev_pct = kpis['severe_delta'] / kpis['combined_base'] * 100
-        st.metric("Severe Shock (+75%)",
-                  f"+${kpis['severe_delta']:.1f}M  (+{_sev_pct:.1f}%)",
-                  delta="vs base cost",
-                  delta_color="inverse")
-    with c4:
-        _p95_pct = kpis['p95_upside'] / kpis['combined_base'] * 100
-        st.metric("P95 Tail Risk (Severe)",
-                  f"${kpis['p95_total']:.0f}M  (+{_p95_pct:.1f}%)",
-                  delta=f"+${kpis['p95_upside']:.1f}M above median",
-                  delta_color="inverse",
-                  help="MC P95 Fleet + Facilities under severe shock")
 
 
 # ╔═══════════════════════════════════════════════════════════════════════════╗
@@ -511,14 +565,14 @@ if active_tab == "📋 Executive Summary":
     """, unsafe_allow_html=True)
 
     # ── Hero KPI cards ─────────────────────────────────────────────────────────
-    def _hero_card(label, value, sub, accent="#38bdf8", icon=""):
+    def _hero_card(label, value, sub, accent="#0284c7", icon=""):
         return (
-            f'<div style="background:#0d1b2a;border:1px solid #1e3a5f;border-top:3px solid {accent};'
-            f'border-radius:10px;padding:1rem 1.25rem;min-height:108px;">'
+            f'<div style="background:#ffffff;border:1px solid #e2e8f0;border-left:4px solid {accent};'
+            f'border-radius:10px;padding:1rem 1.25rem;min-height:108px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">'
             f'<div style="color:#64748b;font-size:.68rem;font-weight:600;text-transform:uppercase;'
             f'letter-spacing:.09em;margin-bottom:.3rem;">{icon}&nbsp;{label}</div>'
             f'<div style="color:{accent};font-size:1.55rem;font-weight:700;line-height:1.2;">{value}</div>'
-            f'<div style="color:#475569;font-size:.74rem;margin-top:.3rem;">{sub}</div>'
+            f'<div style="color:#64748b;font-size:.74rem;margin-top:.3rem;">{sub}</div>'
             f'</div>'
         )
 
@@ -532,7 +586,7 @@ if active_tab == "📋 Executive Summary":
             "Portfolio Baseline",
             f"${portfolio_base:.0f}M",
             f"Fleet ${fleet_base_M:.0f}M  ·  Facilities ${fac_base_M:.0f}M",
-            accent="#38bdf8", icon="📦"
+            accent="#0284c7", icon="📦"
         ), unsafe_allow_html=True)
     with _hk2:
         st.markdown(_hero_card(
@@ -563,28 +617,28 @@ if active_tab == "📋 Executive Summary":
 
     def _portfolio_card(rows_html, footer):
         return (
-            f'<div style="background:#0d1b2a;border:1px solid #1e3a5f;border-radius:10px;'
-            f'padding:1rem 1.25rem;">'
+            f'<div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:10px;'
+            f'padding:1rem 1.25rem;box-shadow:0 1px 4px rgba(0,0,0,0.06);">'
             f'<div style="display:grid;grid-template-columns:1fr 1fr;gap:.85rem;">{rows_html}</div>'
-            f'<div style="margin-top:.75rem;padding-top:.75rem;border-top:1px solid #1e3a5f;'
-            f'color:#475569;font-size:.7rem;">{footer}</div>'
+            f'<div style="margin-top:.75rem;padding-top:.75rem;border-top:1px solid #e2e8f0;'
+            f'color:#64748b;font-size:.7rem;">{footer}</div>'
             f'</div>'
         )
 
-    def _stat(label, val, sub, color="#e2e8f0"):
+    def _stat(label, val, sub, color="#0f172a"):
         return (
             f'<div><div style="color:#64748b;font-size:.68rem;text-transform:uppercase;'
             f'letter-spacing:.06em;">{label}</div>'
             f'<div style="color:{color};font-size:1.15rem;font-weight:700;">{val}</div>'
-            f'<div style="color:#475569;font-size:.7rem;">{sub}</div></div>'
+            f'<div style="color:#64748b;font-size:.7rem;">{sub}</div></div>'
         )
 
     with _pl:
         st.markdown("#### 🚗 Fleet Portfolio")
         _fleet_share = fleet_base_M / portfolio_base * 100 if portfolio_base > 0 else 0
         rows = (
-            _stat("Baseline Cost",   f"${fleet_base_M:.0f}M",    f"{_fleet_share:.0f}% of portfolio",      color="#38bdf8") +
-            _stat("Severe Shock",    f"+${fleet_sev_delta:.1f}M", f"${fleet_sev_total:.0f}M total",         color="#f87171") +
+            _stat("Baseline Cost",   f"${fleet_base_M:.0f}M",    f"{_fleet_share:.0f}% of portfolio",      color="#0284c7") +
+            _stat("Severe Shock",    f"+${fleet_sev_delta:.1f}M", f"${fleet_sev_total:.0f}M total",         color="#dc2626") +
             _stat("Fuel Exposure",   f"{fleet_fuel_pct:.1f}%",    "of Fleet baseline (fuel cost)") +
             _stat("MC P95 (Severe)", f"${fleet_p95_ex:.0f}M",     "95th pct — Weibull 125 runs")
         )
@@ -594,8 +648,8 @@ if active_tab == "📋 Executive Summary":
         st.markdown("#### 🏛️ Facilities Portfolio")
         _fac_share = fac_base_M / portfolio_base * 100 if portfolio_base > 0 else 0
         rows = (
-            _stat("Optimized Baseline", f"${fac_base_M:.0f}M",      f"{_fac_share:.0f}% of portfolio",       color="#38bdf8") +
-            _stat("Severe Shock",       f"+${fac_energy_exp:.1f}M",  f"${fac_sev_total:.0f}M total",          color="#f87171") +
+            _stat("Optimized Baseline", f"${fac_base_M:.0f}M",      f"{_fac_share:.0f}% of portfolio",       color="#0284c7") +
+            _stat("Severe Shock",       f"+${fac_energy_exp:.1f}M",  f"${fac_sev_total:.0f}M total",          color="#dc2626") +
             _stat("Energy Share O&M",   "28%",                        "Electricity + nat-gas + fuel oil") +
             _stat("MC P95 (Severe)",    f"${fac_p95_ex:.0f}M",       "95th pct — Sigmoid MC 125 runs")
         )
@@ -609,7 +663,8 @@ if active_tab == "📋 Executive Summary":
         _hf_ex  = load_budget_df()
         _oc_ex  = load_oil_correlation()
         _yr_ex  = sorted(_hf_ex["Fiscal_Year"].unique())
-        _d_ser  = _hf_ex[_hf_ex["Category"] == "Motor Vehicle Diesel Fuel"].set_index("Fiscal_Year")["Amount_M"]
+        _fleet_cats = ["Motor Vehicle Diesel Fuel", "Motor Vehicle Gasoline", "Alternative Fuel"]
+        _d_ser  = _hf_ex[_hf_ex["Category"].isin(_fleet_cats)].groupby("Fiscal_Year")["Amount_M"].sum()
         _e_ser  = _hf_ex[_hf_ex["Category"] == "Electricity"].set_index("Fiscal_Year")["Amount_M"]
         _d_dates = [pd.Timestamp(f"{y}-01-01") for y in _yr_ex]
         _d_vals  = [float(_d_ser.get(y, 0)) for y in _yr_ex]
@@ -642,9 +697,9 @@ if active_tab == "📋 Executive Summary":
         st.plotly_chart(
             make_oil_cost_chart(
                 _chart_data,
-                diesel_label      = "Diesel Budget ($M)",
+                diesel_label      = "Fleet Fuel Budget ($M)",
                 elec_label        = "Electricity Budget ($M)",
-                diesel_proj_label = "Diesel Budget Projected",
+                diesel_proj_label = "Fleet Fuel Projected",
                 elec_proj_label   = "Electricity Budget Projected",
                 title             = f"WTI Crude vs DPS Energy Budget  (2016 – 2033)  |  Scenario: ${sb_peak_wti}/bbl peak {sb_peak_yr}",
                 x_range           = ["2016-01-01", "2033-12-31"],
@@ -694,10 +749,7 @@ if active_tab == "📋 Executive Summary":
     )
 
 
-# ╔═══════════════════════════════════════════════════════════════════════════╗
-# ║  TAB 1 — Fuel Price Sensitivity                                          ║
-# ╚═══════════════════════════════════════════════════════════════════════════╝
-if active_tab == "⚡ Fuel Price Sensitivity":
+if False and active_tab == "⚡ Fuel Price Sensitivity":  # removed tab
     # ── Your WTI scenario callout ──────────────────────────────────────────────
     _cs_fleet = fleet_cs[fleet_cs["Fiscal_Year"] == focus_year].sort_values("Crude_Δ_$/bbl")
     _cs_fac   = fac_cs[fac_cs["Fiscal_Year"]   == focus_year].sort_values("Crude_Δ_$/bbl")
@@ -808,10 +860,7 @@ Chicago diesel pass-through ratio to budget: **1.41×** (12-month lag, r=0.762, 
         """)
 
 
-# ╔═══════════════════════════════════════════════════════════════════════════╗
-# ║  TAB 2 — FY2026-2027 Budget Scenarios                                    ║
-# ╚═══════════════════════════════════════════════════════════════════════════╝
-if active_tab == "📊 Budget Scenarios":
+if False and active_tab == "📊 Budget Scenarios":  # removed tab
     sel_year = focus_year
 
     st.markdown(f"### Monte Carlo Risk Bands — FY{sel_year}")
@@ -1316,14 +1365,14 @@ Sources: GFOA Fleet Benchmarks, DOT Commodity Index Studies, DOE CBECS.
 
 
 # ╔═══════════════════════════════════════════════════════════════════════════╗
-# ║  TAB 1 — Oil Price vs (Budget Appropriations / Actual Spend toggle)      ║
+# ║  TAB — Oil Price vs Fleet                                                ║
 # ╚═══════════════════════════════════════════════════════════════════════════╝
-if active_tab == "🛢️ Oil Price vs":
+if active_tab == "🛢️ Oil Price vs Fleet":
 
     # ── View toggle ───────────────────────────────────────────────────────────
     oil_view = st.pills(
         "", ["Budget Appropriations", "Actual Spend"],
-        default="Budget Appropriations", key="oil_view",
+        default="Budget Appropriations", key="oil_view_fleet",
         label_visibility="collapsed",
     )
 
@@ -1331,9 +1380,9 @@ if active_tab == "🛢️ Oil Price vs":
 
     # ── Compact metric cards + yellow info popover ─────────────────────────
     st.markdown("""<style>
-[data-testid="stMetric"]{padding:.25rem .5rem!important;background:rgba(255,255,255,.03);border-radius:6px}
-[data-testid="stMetricLabel"] p{font-size:.72rem!important;color:#94a3b8!important;margin-bottom:.1rem!important}
-[data-testid="stMetricValue"]{font-size:1.05rem!important}
+[data-testid="stMetric"]{padding:.25rem .5rem!important;background:#ffffff!important;border:1px solid #e2e8f0!important;border-left:3px solid #3b82f6!important;border-radius:8px!important;box-shadow:0 1px 4px rgba(0,0,0,0.06)!important}
+[data-testid="stMetricLabel"] p{font-size:.72rem!important;color:#64748b!important;margin-bottom:.1rem!important}
+[data-testid="stMetricValue"]{font-size:1.05rem!important;color:#0f172a!important}
 [data-testid="stMetricDelta"] svg,[data-testid="stMetricDelta"] p{font-size:.65rem!important}
 [data-testid="stPopover"]>button{background:#f59e0b!important;color:#1e293b!important;
   border-radius:50%!important;width:26px!important;height:26px!important;min-height:0!important;
@@ -1346,121 +1395,58 @@ if active_tab == "🛢️ Oil Price vs":
     # ══════════════════════════════════════════════════════════════════════════
     if oil_view == "Budget Appropriations":
 
-        ENERGY_BUDGET_FILE = "chicago_energy_budget_2016_2025.xlsx"
+        hf   = load_budget_df()
+        oc_b = load_oil_correlation()
 
-        # Normalize account names: Socrata datasets use UPPERCASE pre-2023,
-        # title case from 2023 onward.
-        _ACCOUNT_CLEAN = {
-            "MOTOR VEHICLE DIESEL FUEL": "Motor Vehicle Diesel Fuel",
-            "MOTOR VEHL DIESEL FUEL":    "Motor Vehicle Diesel Fuel",   # 2016 abbreviation
-            "Motor Vehicle Diesel Fuel": "Motor Vehicle Diesel Fuel",
-            "MOTOR VEHICLE GASOLINE":    "Motor Vehicle Gasoline",
-            "GASOLINE":                  "Motor Vehicle Gasoline",
-            "Gasoline":                  "Motor Vehicle Gasoline",
-            "ALTERNATIVE FUEL":          "Alternative Fuel",
-            "Alternative Fuel":          "Alternative Fuel",
-            "FUEL OIL":                  "Fuel Oil",
-            "Fuel Oil":                  "Fuel Oil",
-            "OTHER FUEL":                "Other Fuel",
-            "Other Fuel":                "Other Fuel",
-            "ELECTRICITY":               "Electricity",
-            "Electricity":               "Electricity",
-            "NATURAL GAS":               "Natural Gas",
-            "Natural Gas":               "Natural Gas",
-        }
-
-        @st.cache_data
-        def load_energy_budget():
-            """
-            Reads chicago_energy_budget_2016_2025.xlsx (sheet detail_by_account).
-            Normalizes account names (inconsistent casing across years in Socrata).
-            Returns DataFrame with columns: Category, Fiscal_Year, Amount, Amount_M.
-            """
-            df = pd.read_excel(ENERGY_BUDGET_FILE, sheet_name="detail_by_account")
-            df["Category"]    = df["account"].map(_ACCOUNT_CLEAN)
-            df["Fiscal_Year"] = df["year"].astype(int)
-            df["Amount"]      = pd.to_numeric(df["total_spend"], errors="coerce").fillna(0)
-            df["Amount_M"]    = df["Amount"] / 1e6
-            # Aggregate to merge UPPER and title-case duplicates from the same year
-            df = (df.groupby(["Category", "Fiscal_Year"], as_index=False)
-                    .agg(Amount=("Amount", "sum"), Amount_M=("Amount_M", "sum")))
-            return df
-
-        @st.cache_data(show_spinner="Fetching oil price data...", ttl=3600)
-        def get_oil_correlation_budget():
-            return compute_oil_cost_correlation()
-
-        hf  = load_energy_budget()
-        oc_b = get_oil_correlation_budget()
+        _fleet_cats_b = ["Motor Vehicle Diesel Fuel", "Motor Vehicle Gasoline", "Alternative Fuel"]
+        years_sorted  = sorted(hf["Fiscal_Year"].unique())
+        fleet_series  = hf[hf["Category"].isin(_fleet_cats_b)].groupby("Fiscal_Year")["Amount_M"].sum()
+        yr_max  = int(fleet_series.index.max())
+        yr_prev = yr_max - 1
 
         # ── Title + info popover ───────────────────────────────────────────────
         _tc, _ic = st.columns([11, 1])
         with _tc:
-            st.markdown("### Budget Appropriations vs WTI Crude — FY2016–2025")
+            st.markdown("### Fleet Fuel Budget vs WTI Crude — FY2016–2025")
         with _ic:
             with st.popover("❕"):
                 st.markdown(
                     "**Source:** `chicago_energy_budget_2016_2025.xlsx` — annual appropriations "
                     "by account from Chicago Data Portal (Budget Ordinance datasets).  \n"
-                    "**Includes:** Diesel, Gasoline, Alternative Fuel, Fuel Oil, Electricity, Natural Gas."
+                    "**Fleet accounts:** Motor Vehicle Diesel Fuel, Motor Vehicle Gasoline, Alternative Fuel."
                 )
 
-        total_by_year = hf.groupby("Fiscal_Year")["Amount_M"].sum()
-        diesel_series = hf[hf["Category"] == "Motor Vehicle Diesel Fuel"].set_index("Fiscal_Year")["Amount_M"]
-        elec_series   = hf[hf["Category"] == "Electricity"].set_index("Fiscal_Year")["Amount_M"]
-        yr_max  = int(total_by_year.index.max())
-        yr_prev = yr_max - 1
-
-        k1, k2, k3, k4 = st.columns(4)
+        k1, k2, k3 = st.columns(3)
         with k1:
-            total_max  = total_by_year.get(yr_max, 0)
-            total_prev = total_by_year.get(yr_prev, 0)
-            delta_tot  = total_max - total_prev
-            st.metric(f"Total Budget FY{yr_max}", f"${total_max:.1f}M",
-                      delta=f"{'+'if delta_tot>=0 else ''}{delta_tot:.1f}M vs FY{yr_prev}",
-                      delta_color="inverse" if delta_tot > 0 else "normal")
-        with k2:
-            d_max  = diesel_series.get(yr_max, 0)
-            d_prev = diesel_series.get(yr_prev, 0)
-            st.metric(f"Diesel Budget FY{yr_max}", f"${d_max:.2f}M",
+            d_max  = fleet_series.get(yr_max, 0)
+            d_prev = fleet_series.get(yr_prev, 0)
+            st.metric(f"Fleet Fuel Budget FY{yr_max}", f"${d_max:.2f}M",
                       delta=f"{'+'if (d_max-d_prev)>=0 else ''}{d_max-d_prev:.2f}M vs FY{yr_prev}",
                       delta_color="inverse" if (d_max - d_prev) > 0 else "normal")
+        with k2:
+            peak_yr  = int(fleet_series.idxmax())
+            peak_val = fleet_series.max()
+            st.metric("Peak Fleet Budget", f"${peak_val:.2f}M",
+                      delta=f"FY{peak_yr}", delta_color="off")
         with k3:
-            e_max  = elec_series.get(yr_max, 0)
-            e_prev = elec_series.get(yr_prev, 0)
-            st.metric(f"Electricity Budget FY{yr_max}", f"${e_max:.1f}M",
-                      delta=f"{'+'if (e_max-e_prev)>=0 else ''}{e_max-e_prev:.1f}M vs FY{yr_prev}",
-                      delta_color="inverse" if (e_max - e_prev) > 0 else "normal")
-        with k4:
             st.metric("WTI Today", f"${oc_b['current_wti']:.2f}/bbl",
                       delta=f"Crisis peak ${oc_b['spike_wti']:.0f} (Mar 9)",
                       delta_color="inverse")
 
-        # ── Build chart using sidebar WTI scenario ────────────────────────────
-        _scen_peak_b = sb_peak_wti
-        _scen_yr_b   = sb_peak_yr
-        _scen_hl_b   = sb_halflife
-        _scen_lr_b   = sb_lr
-
-        years_sorted  = sorted(hf["Fiscal_Year"].unique())
-        diesel_series = hf[hf["Category"] == "Motor Vehicle Diesel Fuel"].set_index("Fiscal_Year")["Amount_M"]
-        elec_series   = hf[hf["Category"] == "Electricity"].set_index("Fiscal_Year")["Amount_M"]
-        diesel_dates  = [pd.Timestamp(f"{y}-01-01") for y in years_sorted]
-        diesel_vals   = [float(diesel_series.get(y, 0)) for y in years_sorted]
-        elec_vals     = [float(elec_series.get(y, 0))   for y in years_sorted]
-
-        base_diesel_vol = diesel_vals[-1] * 1e6 / 4.10
-        base_elec_val   = elec_vals[-1]
+        # ── Build chart ────────────────────────────────────────────────────────
+        fleet_dates = [pd.Timestamp(f"{y}-01-01") for y in years_sorted]
+        fleet_vals  = [float(fleet_series.get(y, 0)) for y in years_sorted]
+        base_fleet_vol = fleet_vals[-1] * 1e6 / 4.10
 
         scen_b = generate_wti_forecast(
             current_wti        = oc_b["current_wti"],
-            peak_wti           = float(_scen_peak_b),
-            peak_year          = _scen_yr_b,
-            halflife_yrs       = _scen_hl_b,
-            long_run_eq        = float(_scen_lr_b),
+            peak_wti           = float(sb_peak_wti),
+            peak_year          = sb_peak_yr,
+            halflife_yrs       = sb_halflife,
+            long_run_eq        = float(sb_lr),
             sigma              = 0.22,
-            base_diesel_vol_gal= base_diesel_vol,
-            base_elec_M        = base_elec_val,
+            base_diesel_vol_gal= base_fleet_vol,
+            base_elec_M        = None,
         )
 
         _wti_pairs_b = [(d, p) for d, p in zip(oc_b["wti_dates"], oc_b["wti_prices"])
@@ -1469,10 +1455,10 @@ if active_tab == "🛢️ Oil Price vs":
             **oc_b,
             "wti_dates":            [p[0] for p in _wti_pairs_b],
             "wti_prices":           [p[1] for p in _wti_pairs_b],
-            "diesel_dates":         diesel_dates,
-            "diesel_budget":        diesel_vals,
-            "elec_dates":           diesel_dates,
-            "elec_budget":          elec_vals,
+            "diesel_dates":         fleet_dates,
+            "diesel_budget":        fleet_vals,
+            "elec_dates":           fleet_dates,
+            "elec_budget":          [0.0] * len(fleet_dates),
             "diesel_est_2026_M":    None,
             "diesel_budget_2026_M": None,
             **scen_b,
@@ -1481,21 +1467,22 @@ if active_tab == "🛢️ Oil Price vs":
         st.plotly_chart(
             make_oil_cost_chart(
                 oc_b_chart,
-                diesel_label      = "Diesel Budget ($M)",
-                elec_label        = "Electricity Budget ($M)",
-                diesel_proj_label = "Diesel Budget Projected",
-                elec_proj_label   = "Electricity Budget Projected",
-                title             = "Budget Appropriations vs WTI Crude  (2016 – 2033)",
+                diesel_label      = "Fleet Fuel Budget ($M)",
+                diesel_proj_label = "Fleet Fuel Projected",
+                title             = "Fleet Fuel Budget vs WTI Crude  (2016 – 2033)",
                 x_range           = ["2016-01-01", "2033-12-31"],
+                show_fleet        = True,
+                show_elec         = False,
             ),
             use_container_width=True,
         )
 
         st.divider()
 
-        # ── Appropriations detail table by category ────────────────────────────
-        st.markdown("**Appropriations by Category and Fiscal Year ($M)**")
-        pivot = hf.pivot_table(
+        # ── Appropriations detail table — fleet categories only ────────────────
+        st.markdown("**Fleet Fuel Appropriations by Category and Fiscal Year ($M)**")
+        hf_fleet = hf[hf["Category"].isin(_fleet_cats_b)]
+        pivot = hf_fleet.pivot_table(
             index="Category", columns="Fiscal_Year", values="Amount_M", aggfunc="sum", fill_value=0
         ).reset_index()
         pivot.columns.name = None
@@ -1508,78 +1495,44 @@ if active_tab == "🛢️ Oil Price vs":
             st.markdown(f"""
 **Primary source:** `chicago_energy_budget_2016_2025.xlsx` — annual appropriations downloaded from
 Chicago Data Portal (Budget Ordinance - Appropriations datasets, FY2016–FY2025).
-Accounts: Motor Vehicle Diesel Fuel, Motor Vehicle Gasoline, Alternative Fuel, Fuel Oil, Other Fuel,
-Electricity, Natural Gas.
 
-**Normalization note:** Socrata datasets use UPPERCASE for FY2016–2022 and title case for FY2023–2025.
-Account names were normalized for consistency (e.g., `GASOLINE` → `Motor Vehicle Gasoline`,
-`MOTOR VEHL DIESEL FUEL` → `Motor Vehicle Diesel Fuel`).
+**Fleet accounts:** Motor Vehicle Diesel Fuel, Motor Vehicle Gasoline, Alternative Fuel.
 
 **WTI overlay:** Annual average computed from monthly data (`CL=F` via `yfinance`).
 Only years with full coverage are included.
 
-**Diesel Budget projection:** Ornstein-Uhlenbeck mean-reversion model anchored to FY{yr_max}
-diesel appropriation as base volume. Passthrough: `$0.024/gal per $/bbl WTI`.
+**Fleet Budget projection:** Ornstein-Uhlenbeck mean-reversion model anchored to FY{yr_max}
+fleet appropriation as base volume. Passthrough: `$0.024/gal per $/bbl WTI`.
             """)
 
     # ══════════════════════════════════════════════════════════════════════════
-    # VIEW B — Actual Spend (chicago_energy_clean_strict.xlsx)
+    # VIEW B — Fleet Actual Spend
     # ══════════════════════════════════════════════════════════════════════════
     else:  # oil_view == "Actual Spend"
 
-        @st.cache_data(show_spinner="Loading spend data...", ttl=3600)
-        def get_oil_correlation_spend():
-            return compute_oil_cost_correlation()
-
-        @st.cache_data
-        def load_energy_spend():
-            """
-            Reads chicago_energy_clean_strict.xlsx sheet summary_by_year.
-            Returns separate fuel_df and elec_df with value_M column.
-            Consolidates multiple vendors per year via groupby.
-            """
-            df = pd.read_excel(ENERGY_SPEND_FILE, sheet_name="summary_by_year")
-            df.columns = ["year", "type", "category", "total_spend"]
-            df["value_M"] = df["total_spend"] / 1e6
-            fuel = df[df["type"] == "fuel"].copy().sort_values("year")
-            elec = df[df["type"] == "electricity"].copy().sort_values("year")
-            fuel = fuel.groupby("year", as_index=False)["value_M"].sum()
-            elec = elec.groupby("year", as_index=False)["value_M"].sum()
-            return fuel, elec
-
-        @st.cache_data
-        def load_vendor_detail():
-            """Reads vendor_level sheet for vendor-level spend breakdown."""
-            df = pd.read_excel(ENERGY_SPEND_FILE, sheet_name="vendor_level")
-            df.columns = ["vendor", "type", "category", "year", "total_spend"]
-            df["value_M"] = df["total_spend"] / 1e6
-            return df
-
-        oc_s     = get_oil_correlation_spend()
-        fuel_es, elec_es = load_energy_spend()
-        vend_df  = load_vendor_detail()
+        oc_s            = load_oil_correlation()
+        fuel_es, _elec  = load_energy_spend()
+        vend_df         = load_vendor_detail()
 
         # ── Title + info popover ───────────────────────────────────────────────
         _ts, _is = st.columns([11, 1])
         with _ts:
-            st.markdown("### Actual Spend vs WTI Crude — Payments Dataset (Chicago Data Portal)")
+            st.markdown("### Fleet Fuel Actual Spend vs WTI Crude — Payments Dataset")
         with _is:
             with st.popover("❕"):
                 st.markdown(
-                    "**Source:** `chicago_energy_clean_strict.xlsx` — consolidated Chicago Data Portal Payments.  \n"
-                    "**Fleet fuel:** Colonial Oil Industries (diesel + gasoline).  \n"
-                    "**Electricity:** Constellation NewEnergy.  \n"
-                    "Historical coverage: 2002–2024 (partial years excluded from analysis)."
+                    "**Source:** `chicago_energy_clean_strict.xlsx` — Chicago Data Portal Payments.  \n"
+                    "**Fleet fuel:** Colonial Oil Industries (contracts 129971 diesel + 129972 gasoline).  \n"
+                    "Historical coverage: 2002–2024 (partial years excluded)."
                 )
 
         # ── KPI banner ────────────────────────────────────────────────────────
-        recent_fuel = fuel_es[fuel_es["year"] >= 2021]
-        recent_elec = elec_es[elec_es["year"] >= 2021]
+        recent_fuel   = fuel_es[fuel_es["year"] >= 2021]
         peak_fuel_row = recent_fuel.loc[recent_fuel["value_M"].idxmax()]
-        peak_elec_row = recent_elec.loc[recent_elec["value_M"].idxmax()]
-        total_recent  = recent_fuel["value_M"].sum() + recent_elec["value_M"].sum()
+        n_yrs_f       = len(recent_fuel)
+        total_fuel_r  = recent_fuel["value_M"].sum()
 
-        s1, s2, s3, s4 = st.columns(4)
+        s1, s2, s3 = st.columns(3)
         with s1:
             st.metric("WTI Today", f"${oc_s['current_wti']:.2f}/bbl",
                       delta=f"Crisis peak ${oc_s['spike_wti']:.0f} (Mar 9)",
@@ -1588,45 +1541,29 @@ diesel appropriation as base volume. Passthrough: `$0.024/gal per $/bbl WTI`.
             st.metric("Peak Fleet Fuel Spend", f"${peak_fuel_row['value_M']:.1f}M",
                       delta=f"FY{int(peak_fuel_row['year'])}", delta_color="off")
         with s3:
-            st.metric("Peak Electricity Spend", f"${peak_elec_row['value_M']:.1f}M",
-                      delta=f"FY{int(peak_elec_row['year'])}", delta_color="off")
-        with s4:
-            n_yrs = len(recent_fuel)
-            st.metric(f"Total Energy Spend FY2021–{int(recent_fuel['year'].max())}",
-                      f"${total_recent:.1f}M",
-                      delta=f"Avg ${total_recent/n_yrs:.1f}M/yr", delta_color="off")
+            st.metric(f"Total Fleet Spend FY2021–{int(recent_fuel['year'].max())}",
+                      f"${total_fuel_r:.1f}M",
+                      delta=f"Avg ${total_fuel_r/n_yrs_f:.1f}M/yr", delta_color="off")
 
-        # Exclude current partial year — incomplete payment portal data
+        # Exclude current partial year
         CURRENT_PARTIAL_YEAR = 2026
         fuel_es_plot = fuel_es[fuel_es["year"] < CURRENT_PARTIAL_YEAR]
-        elec_es_plot = elec_es[elec_es["year"] < CURRENT_PARTIAL_YEAR]
-
         fuel_dates_s = [pd.Timestamp(f"{int(y)}-01-01") for y in fuel_es_plot["year"]]
         fuel_vals_s  = fuel_es_plot["value_M"].tolist()
-        elec_dates_s = [pd.Timestamp(f"{int(y)}-01-01") for y in elec_es_plot["year"]]
-        elec_vals_s  = elec_es_plot["value_M"].tolist()
-
-        # ── Build chart using sidebar WTI scenario ────────────────────────────
-        _scen_s_peak = sb_peak_wti
-        _scen_s_yr   = sb_peak_yr
-        _scen_s_hl   = sb_halflife
-        _scen_s_lr   = sb_lr
 
         last_fuel_yr  = int(fuel_es_plot["year"].max())
         last_fuel_M   = float(fuel_es_plot[fuel_es_plot["year"] == last_fuel_yr]["value_M"].values[0])
-        last_elec_yr  = int(elec_es_plot["year"].max())
-        last_elec_M   = float(elec_es_plot[elec_es_plot["year"] == last_elec_yr]["value_M"].values[0])
         base_fuel_vol = last_fuel_M * 1e6 / 4.10
 
         scen_s = generate_wti_forecast(
             current_wti        = oc_s["current_wti"],
-            peak_wti           = float(_scen_s_peak),
-            peak_year          = _scen_s_yr,
-            halflife_yrs       = _scen_s_hl,
-            long_run_eq        = float(_scen_s_lr),
+            peak_wti           = float(sb_peak_wti),
+            peak_year          = sb_peak_yr,
+            halflife_yrs       = sb_halflife,
+            long_run_eq        = float(sb_lr),
             sigma              = 0.22,
             base_diesel_vol_gal= base_fuel_vol,
-            base_elec_M        = last_elec_M,
+            base_elec_M        = None,
         )
 
         _wti_pairs_s = [(d, p) for d, p in zip(oc_s["wti_dates"], oc_s["wti_prices"])
@@ -1637,8 +1574,8 @@ diesel appropriation as base volume. Passthrough: `$0.024/gal per $/bbl WTI`.
             "wti_prices":           [p[1] for p in _wti_pairs_s],
             "diesel_dates":         fuel_dates_s,
             "diesel_budget":        fuel_vals_s,
-            "elec_dates":           elec_dates_s,
-            "elec_budget":          elec_vals_s,
+            "elec_dates":           fuel_dates_s,
+            "elec_budget":          [0.0] * len(fuel_dates_s),
             "diesel_est_2026_M":    None,
             "diesel_budget_2026_M": None,
             **scen_s,
@@ -1648,41 +1585,31 @@ diesel appropriation as base volume. Passthrough: `$0.024/gal per $/bbl WTI`.
             make_oil_cost_chart(
                 oc_s_chart,
                 diesel_label      = "Fleet Fuel Spend ($M)",
-                elec_label        = "Electricity Spend ($M)",
                 diesel_proj_label = "Fleet Fuel Projected",
-                elec_proj_label   = "Electricity Projected",
-                title             = "Actual Spend vs WTI Crude  (2016 – 2033)",
+                title             = "Fleet Fuel Actual Spend vs WTI Crude  (2016 – 2033)",
                 x_range           = ["2016-01-01", "2033-12-31"],
+                show_fleet        = True,
+                show_elec         = False,
             ),
             use_container_width=True,
         )
 
         st.divider()
 
-        # ── Vendor breakdown stacked bar ───────────────────────────────────────
-        st.markdown("### Vendor Breakdown — Historical Spend")
-        vendor_filter = st.multiselect(
-            "Filter by type",
-            options=["fuel", "electricity"],
-            default=["fuel", "electricity"],
-            key="os_vendor_filter",
-        )
-        vend_filt  = vend_df[vend_df["type"].isin(vendor_filter)].copy()
-        vend_filt  = vend_filt[vend_filt["year"] >= 2010]   # limit to 2010+ for readability
-        vend_pivot = vend_filt.groupby(["year", "vendor"])["value_M"].sum().reset_index()
-
-        # Keep top 8 vendors by historical total; group the rest as "Others"
+        # ── Vendor breakdown — fleet fuel only ────────────────────────────────
+        st.markdown("### Vendor Breakdown — Fleet Fuel Actual Spend")
+        vend_fuel  = vend_df[vend_df["type"] == "fuel"].copy()
+        vend_fuel  = vend_fuel[vend_fuel["year"] >= 2010]
+        vend_pivot = vend_fuel.groupby(["year", "vendor"])["value_M"].sum().reset_index()
         top_vendors = (
-            vend_pivot.groupby("vendor")["value_M"].sum()
-            .nlargest(8).index.tolist()
+            vend_pivot.groupby("vendor")["value_M"].sum().nlargest(8).index.tolist()
         )
         vend_pivot["vendor_label"] = vend_pivot["vendor"].apply(
             lambda v: v if v in top_vendors else "Others"
         )
         vend_agg = vend_pivot.groupby(["year", "vendor_label"])["value_M"].sum().reset_index()
-
         VENDOR_PALETTE = [
-            "#38bdf8","#a78bfa","#34d399","#fb923c",
+            "#a78bfa","#38bdf8","#34d399","#fb923c",
             "#f87171","#fbbf24","#e879f9","#94a3b8","#64748b",
         ]
         all_vendors = sorted(
@@ -1703,16 +1630,10 @@ diesel appropriation as base volume. Passthrough: `$0.024/gal per $/bbl WTI`.
                 hovertemplate=f"<b>{vname}</b><br>%{{x}}  —  $%{{y:.2f}}M<extra></extra>",
             ))
         fig_vend.update_layout(
-            **PLOTLY_BASE,
-            barmode="stack",
-            height=420,
-            margin=dict(**_MARGIN_BASE),
-            legend=dict(**_LEGEND_BASE),
-            title=dict(
-                text="Actual Spend by Vendor (Fleet Fuel + Electricity, 2010–2024)",
-                font=dict(size=14, color="#e2e8f0"),
-                x=0,
-            ),
+            **PLOTLY_BASE, barmode="stack", height=420,
+            margin=dict(**_MARGIN_BASE), legend=dict(**_LEGEND_BASE),
+            title=dict(text="Fleet Fuel Spend by Vendor (2010–2024)",
+                       font=dict(size=14, color="#e2e8f0"), x=0),
             xaxis=dict(**_AXIS_BASE, title="Fiscal Year"),
             yaxis=dict(**_AXIS_BASE, title="Spend ($M)"),
         )
@@ -1720,20 +1641,12 @@ diesel appropriation as base volume. Passthrough: `$0.024/gal per $/bbl WTI`.
 
         st.divider()
 
-        # ── Consolidated data table ────────────────────────────────────────────
-        st.markdown("**Consolidated Spend by Year and Type ($M)**")
-        merged_tbl = fuel_es.rename(columns={"value_M": "Fleet Fuel ($M)"}).merge(
-            elec_es.rename(columns={"value_M": "Electricity ($M)"}),
-            on="year", how="outer",
-        ).sort_values("year", ascending=False)
-        merged_tbl["Total ($M)"] = (
-            merged_tbl["Fleet Fuel ($M)"].fillna(0) +
-            merged_tbl["Electricity ($M)"].fillna(0)
-        ).round(2)
-        merged_tbl["Fleet Fuel ($M)"]  = merged_tbl["Fleet Fuel ($M)"].round(3)
-        merged_tbl["Electricity ($M)"] = merged_tbl["Electricity ($M)"].round(3)
-        merged_tbl = merged_tbl.rename(columns={"year": "Fiscal Year"})
-        st.dataframe(merged_tbl, hide_index=True, use_container_width=True)
+        # ── Data table ────────────────────────────────────────────────────────
+        st.markdown("**Fleet Fuel Spend by Year ($M)**")
+        fleet_tbl = fuel_es.rename(columns={"value_M": "Fleet Fuel ($M)", "year": "Fiscal Year"})
+        fleet_tbl["Fleet Fuel ($M)"] = fleet_tbl["Fleet Fuel ($M)"].round(3)
+        st.dataframe(fleet_tbl.sort_values("Fiscal Year", ascending=False),
+                     hide_index=True, use_container_width=True)
 
         st.divider()
 
@@ -1741,51 +1654,776 @@ diesel appropriation as base volume. Passthrough: `$0.024/gal per $/bbl WTI`.
         st.markdown("#### Download Data")
         import io
 
-        def _build_excel_spend() -> bytes:
+        def _build_excel_fleet_spend() -> bytes:
             buf = io.BytesIO()
             with pd.ExcelWriter(buf, engine="openpyxl") as xw:
-                # Sheet 1 — Summary by year
-                merged_tbl.to_excel(xw, sheet_name="Summary by Year", index=False)
-                # Sheet 2 — Vendor level
-                vend_df.rename(columns={"value_M": "Spend ($M)"}).to_excel(
+                fleet_tbl.to_excel(xw, sheet_name="Fleet Fuel by Year", index=False)
+                vend_fuel.rename(columns={"value_M": "Spend ($M)"}).to_excel(
                     xw, sheet_name="Vendor Level", index=False)
-                # Sheet 3 — WTI Historical
                 wti_hist = pd.DataFrame({
-                    "Date":        oc_s["wti_dates"],
-                    "WTI ($/bbl)": oc_s["wti_prices"],
+                    "Date": oc_s["wti_dates"], "WTI ($/bbl)": oc_s["wti_prices"],
                 })
                 wti_hist["Date"] = pd.to_datetime(wti_hist["Date"])
                 wti_hist.to_excel(xw, sheet_name="WTI Historical", index=False)
             return buf.getvalue()
 
         st.download_button(
-            label="⬇ Download Excel — Actual Spend (energy_clean_strict) + WTI",
-            data=_build_excel_spend(),
-            file_name="chicago_dps_energy_spend_vs_wti.xlsx",
+            label="⬇ Download Excel — Fleet Fuel Spend + WTI",
+            data=_build_excel_fleet_spend(),
+            file_name="chicago_dps_fleet_fuel_spend_vs_wti.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
 
         with st.expander("Source & Caveats"):
-            st.markdown(f"""
+            st.markdown("""
 **Data source:** `chicago_energy_clean_strict.xlsx` — consolidated actual spend by vendor,
-extracted from Chicago Data Portal Payments Dataset
-([data.cityofchicago.org](https://data.cityofchicago.org/Administration-Finance/Payments/s4vu-giwb)).
+extracted from Chicago Data Portal Payments Dataset.
 
 **Fleet Fuel (type = fuel):**
 - Historical coverage 2002–2024; partial or contract-transition years excluded.
 - Primary vendor: Colonial Oil Industries, Inc. (contracts 129971 diesel + 129972 gasoline).
 - FY2021: excludes ~$3.1M from World Fuel Services (prior contract wind-down).
 
-**Electricity (type = electricity):**
-- Vendor: Constellation NewEnergy, Inc. (contracts 29707 and 198906).
-- ⚠ Includes all Chicago municipal electricity — airports + street lighting (~$22M/yr).
-  Isolating DFF/2FM buildings only requires ordinance budget detail.
-
-**Difference vs Budget Appropriations view:**
-Budget Appropriations shows **what was approved to spend** (`chicago_energy_budget_2016_2025.xlsx`, FY2016–2025).
-Actual Spend shows **what was paid** (`chicago_energy_clean_strict.xlsx`).
-The gap between both reveals budget under/over-execution.
-
-**Projection:** Ornstein-Uhlenbeck mean-reversion anchored to last available actual spend year.
+**Projection:** Ornstein-Uhlenbeck mean-reversion anchored to last actual spend year.
 Sigma = 22% (calibrated from FY2021–2024 historical volatility).
             """)
+
+
+# ╔═══════════════════════════════════════════════════════════════════════════╗
+# ║  TAB — Oil Price vs Facilities                                           ║
+# ╚═══════════════════════════════════════════════════════════════════════════╝
+if active_tab == "🏢 Oil Price vs Facilities":
+
+    oil_view_fac = st.pills(
+        "", ["Budget Appropriations", "Actual Spend"],
+        default="Budget Appropriations", key="oil_view_fac",
+        label_visibility="collapsed",
+    )
+
+    st.divider()
+
+    # ── Compact metric CSS ────────────────────────────────────────────────────
+    st.markdown("""<style>
+[data-testid="stMetric"]{padding:.25rem .5rem!important;background:#ffffff!important;border:1px solid #e2e8f0!important;border-left:3px solid #3b82f6!important;border-radius:8px!important;box-shadow:0 1px 4px rgba(0,0,0,0.06)!important}
+[data-testid="stMetricLabel"] p{font-size:.72rem!important;color:#64748b!important;margin-bottom:.1rem!important}
+[data-testid="stMetricValue"]{font-size:1.05rem!important;color:#0f172a!important}
+[data-testid="stMetricDelta"] svg,[data-testid="stMetricDelta"] p{font-size:.65rem!important}
+[data-testid="stPopover"]>button{background:#f59e0b!important;color:#1e293b!important;
+  border-radius:50%!important;width:26px!important;height:26px!important;min-height:0!important;
+  padding:0!important;font-size:.85rem!important;font-weight:bold!important;border:none!important;
+  line-height:1!important;display:flex!important;align-items:center!important;justify-content:center!important}
+</style>""", unsafe_allow_html=True)
+
+    _FAC_CATS = ["Electricity", "Natural Gas", "Fuel Oil"]
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # VIEW A — Facilities Budget Appropriations
+    # ══════════════════════════════════════════════════════════════════════════
+    if oil_view_fac == "Budget Appropriations":
+
+        hf    = load_budget_df()
+        oc_fa = load_oil_correlation()
+
+        years_sorted = sorted(hf["Fiscal_Year"].unique())
+        fac_series   = hf[hf["Category"].isin(_FAC_CATS)].groupby("Fiscal_Year")["Amount_M"].sum()
+        elec_series  = hf[hf["Category"] == "Electricity"].set_index("Fiscal_Year")["Amount_M"]
+        ng_series    = hf[hf["Category"] == "Natural Gas"].set_index("Fiscal_Year")["Amount_M"]
+        yr_max  = int(fac_series.index.max())
+        yr_prev = yr_max - 1
+
+        # ── Title + info popover ───────────────────────────────────────────────
+        _tc, _ic = st.columns([11, 1])
+        with _tc:
+            st.markdown("### Facilities Energy Budget vs WTI Crude — FY2016–2025")
+        with _ic:
+            with st.popover("❕"):
+                st.markdown(
+                    "**Source:** `chicago_energy_budget_2016_2025.xlsx` — annual appropriations "
+                    "from Chicago Data Portal (Budget Ordinance datasets).  \n"
+                    "**Facilities accounts:** Electricity, Natural Gas, Fuel Oil."
+                )
+
+        k1, k2, k3, k4 = st.columns(4)
+        with k1:
+            f_max  = fac_series.get(yr_max, 0)
+            f_prev = fac_series.get(yr_prev, 0)
+            st.metric(f"Facilities Budget FY{yr_max}", f"${f_max:.1f}M",
+                      delta=f"{'+'if (f_max-f_prev)>=0 else ''}{f_max-f_prev:.1f}M vs FY{yr_prev}",
+                      delta_color="inverse" if (f_max - f_prev) > 0 else "normal")
+        with k2:
+            e_max  = elec_series.get(yr_max, 0)
+            e_prev = elec_series.get(yr_prev, 0)
+            st.metric(f"Electricity FY{yr_max}", f"${e_max:.1f}M",
+                      delta=f"{'+'if (e_max-e_prev)>=0 else ''}{e_max-e_prev:.1f}M vs FY{yr_prev}",
+                      delta_color="inverse" if (e_max - e_prev) > 0 else "normal")
+        with k3:
+            ng_max  = ng_series.get(yr_max, 0)
+            ng_prev = ng_series.get(yr_prev, 0)
+            st.metric(f"Natural Gas FY{yr_max}", f"${ng_max:.1f}M",
+                      delta=f"{'+'if (ng_max-ng_prev)>=0 else ''}{ng_max-ng_prev:.1f}M vs FY{yr_prev}",
+                      delta_color="inverse" if (ng_max - ng_prev) > 0 else "normal")
+        with k4:
+            st.metric("WTI Today", f"${oc_fa['current_wti']:.2f}/bbl",
+                      delta=f"Crisis peak ${oc_fa['spike_wti']:.0f} (Mar 9)",
+                      delta_color="inverse")
+
+        # ── Build chart ────────────────────────────────────────────────────────
+        fac_dates = [pd.Timestamp(f"{y}-01-01") for y in years_sorted]
+        fac_vals  = [float(fac_series.get(y, 0)) for y in years_sorted]
+
+        scen_fa = generate_wti_forecast(
+            current_wti        = oc_fa["current_wti"],
+            peak_wti           = float(sb_peak_wti),
+            peak_year          = sb_peak_yr,
+            halflife_yrs       = sb_halflife,
+            long_run_eq        = float(sb_lr),
+            sigma              = 0.22,
+            base_diesel_vol_gal= None,
+            base_elec_M        = fac_vals[-1],
+        )
+
+        _wti_pairs_fa = [(d, p) for d, p in zip(oc_fa["wti_dates"], oc_fa["wti_prices"])
+                         if pd.Timestamp(d).year >= 2016]
+        oc_fa_chart = {
+            **oc_fa,
+            "wti_dates":            [p[0] for p in _wti_pairs_fa],
+            "wti_prices":           [p[1] for p in _wti_pairs_fa],
+            "diesel_dates":         fac_dates,
+            "diesel_budget":        [0.0] * len(fac_dates),
+            "elec_dates":           fac_dates,
+            "elec_budget":          fac_vals,
+            "diesel_est_2026_M":    None,
+            "diesel_budget_2026_M": None,
+            **scen_fa,
+        }
+
+        st.plotly_chart(
+            make_oil_cost_chart(
+                oc_fa_chart,
+                elec_label      = "Facilities Budget ($M)",
+                elec_proj_label = "Facilities Projected",
+                title           = "Facilities Budget vs WTI Crude  (2016 – 2033)",
+                x_range         = ["2016-01-01", "2033-12-31"],
+                show_fleet      = False,
+                show_elec       = True,
+            ),
+            use_container_width=True,
+        )
+
+        st.divider()
+
+        # ── Appropriations detail table — facilities categories ────────────────
+        st.markdown("**Facilities Energy Appropriations by Category and Fiscal Year ($M)**")
+        hf_fac = hf[hf["Category"].isin(_FAC_CATS)]
+        pivot_fac = hf_fac.pivot_table(
+            index="Category", columns="Fiscal_Year", values="Amount_M", aggfunc="sum", fill_value=0
+        ).reset_index()
+        pivot_fac.columns.name = None
+        pivot_fac["Total FY2016–2025"] = pivot_fac[[c for c in pivot_fac.columns if isinstance(c, int)]].sum(axis=1)
+        for col in [c for c in pivot_fac.columns if isinstance(c, int)] + ["Total FY2016–2025"]:
+            pivot_fac[col] = pivot_fac[col].round(3)
+        st.dataframe(pivot_fac, hide_index=True, use_container_width=True)
+
+        with st.expander("Source & Methodology"):
+            st.markdown(f"""
+**Primary source:** `chicago_energy_budget_2016_2025.xlsx` — annual appropriations downloaded from
+Chicago Data Portal (Budget Ordinance - Appropriations datasets, FY2016–FY2025).
+
+**Facilities accounts:** Electricity (grid power), Natural Gas (heating), Fuel Oil (boilers/heating backup).
+Fuel Oil is treated as a facilities energy source because it is burned in building heating systems,
+not used in fleet vehicles.
+
+**WTI passthrough to facilities:** 0.21 combined (electricity 80% × 0.15 + natural gas 20% × 0.45).
+Fuel Oil has near-direct crude price correlation (petroleum distillate).
+
+**Facilities Budget projection:** Ornstein-Uhlenbeck mean-reversion anchored to FY{yr_max}
+facilities total as base value. WTI passthrough factor: 0.15 (electricity grid component).
+            """)
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # VIEW B — Facilities Actual Spend (electricity only in payments dataset)
+    # ══════════════════════════════════════════════════════════════════════════
+    else:  # oil_view_fac == "Actual Spend"
+
+        oc_fa           = load_oil_correlation()
+        _fuel, elec_es  = load_energy_spend()
+        vend_df         = load_vendor_detail()
+
+        # ── Title + info popover ───────────────────────────────────────────────
+        _ts, _is = st.columns([11, 1])
+        with _ts:
+            st.markdown("### Facilities Electricity Actual Spend vs WTI Crude")
+        with _is:
+            with st.popover("❕"):
+                st.markdown(
+                    "**Source:** `chicago_energy_clean_strict.xlsx` — Chicago Data Portal Payments.  \n"
+                    "**Note:** Only electricity is captured in the payments dataset. "
+                    "Natural Gas and Fuel Oil actual spend is not available at this granularity — "
+                    "use Budget Appropriations view for the full facilities picture.  \n"
+                    "**Vendor:** Constellation NewEnergy, Inc."
+                )
+
+        # ── KPI banner ────────────────────────────────────────────────────────
+        recent_elec   = elec_es[elec_es["year"] >= 2021]
+        peak_elec_row = recent_elec.loc[recent_elec["value_M"].idxmax()]
+        n_yrs_e       = len(recent_elec)
+        total_elec_r  = recent_elec["value_M"].sum()
+
+        s1, s2, s3 = st.columns(3)
+        with s1:
+            st.metric("WTI Today", f"${oc_fa['current_wti']:.2f}/bbl",
+                      delta=f"Crisis peak ${oc_fa['spike_wti']:.0f} (Mar 9)",
+                      delta_color="inverse")
+        with s2:
+            st.metric("Peak Electricity Spend", f"${peak_elec_row['value_M']:.1f}M",
+                      delta=f"FY{int(peak_elec_row['year'])}", delta_color="off")
+        with s3:
+            st.metric(f"Total Elec Spend FY2021–{int(recent_elec['year'].max())}",
+                      f"${total_elec_r:.1f}M",
+                      delta=f"Avg ${total_elec_r/n_yrs_e:.1f}M/yr", delta_color="off")
+
+        # Exclude current partial year
+        CURRENT_PARTIAL_YEAR = 2026
+        elec_es_plot = elec_es[elec_es["year"] < CURRENT_PARTIAL_YEAR]
+        elec_dates_fa = [pd.Timestamp(f"{int(y)}-01-01") for y in elec_es_plot["year"]]
+        elec_vals_fa  = elec_es_plot["value_M"].tolist()
+
+        last_elec_yr = int(elec_es_plot["year"].max())
+        last_elec_M  = float(elec_es_plot[elec_es_plot["year"] == last_elec_yr]["value_M"].values[0])
+
+        scen_fa_s = generate_wti_forecast(
+            current_wti        = oc_fa["current_wti"],
+            peak_wti           = float(sb_peak_wti),
+            peak_year          = sb_peak_yr,
+            halflife_yrs       = sb_halflife,
+            long_run_eq        = float(sb_lr),
+            sigma              = 0.22,
+            base_diesel_vol_gal= None,
+            base_elec_M        = last_elec_M,
+        )
+
+        _wti_pairs_fa = [(d, p) for d, p in zip(oc_fa["wti_dates"], oc_fa["wti_prices"])
+                         if pd.Timestamp(d).year >= 2016]
+        oc_fa_s_chart = {
+            **oc_fa,
+            "wti_dates":            [p[0] for p in _wti_pairs_fa],
+            "wti_prices":           [p[1] for p in _wti_pairs_fa],
+            "diesel_dates":         elec_dates_fa,
+            "diesel_budget":        [0.0] * len(elec_dates_fa),
+            "elec_dates":           elec_dates_fa,
+            "elec_budget":          elec_vals_fa,
+            "diesel_est_2026_M":    None,
+            "diesel_budget_2026_M": None,
+            **scen_fa_s,
+        }
+
+        st.plotly_chart(
+            make_oil_cost_chart(
+                oc_fa_s_chart,
+                elec_label      = "Electricity Spend ($M)",
+                elec_proj_label = "Electricity Projected",
+                title           = "Electricity Actual Spend vs WTI Crude  (2016 – 2033)",
+                x_range         = ["2016-01-01", "2033-12-31"],
+                show_fleet      = False,
+                show_elec       = True,
+            ),
+            use_container_width=True,
+        )
+
+        st.divider()
+
+        # ── Vendor breakdown — electricity vendors ────────────────────────────
+        st.markdown("### Vendor Breakdown — Electricity Actual Spend")
+        vend_elec  = vend_df[vend_df["type"] == "electricity"].copy()
+        vend_elec  = vend_elec[vend_elec["year"] >= 2010]
+        vend_epivot = vend_elec.groupby(["year", "vendor"])["value_M"].sum().reset_index()
+        top_evend = (
+            vend_epivot.groupby("vendor")["value_M"].sum().nlargest(8).index.tolist()
+        )
+        vend_epivot["vendor_label"] = vend_epivot["vendor"].apply(
+            lambda v: v if v in top_evend else "Others"
+        )
+        vend_eagg = vend_epivot.groupby(["year", "vendor_label"])["value_M"].sum().reset_index()
+        VENDOR_PALETTE_E = [
+            "#38bdf8","#34d399","#a78bfa","#fb923c",
+            "#f87171","#fbbf24","#e879f9","#94a3b8","#64748b",
+        ]
+        all_evend = sorted(
+            vend_eagg["vendor_label"].unique(),
+            key=lambda v: vend_eagg[vend_eagg["vendor_label"]==v]["value_M"].sum(),
+            reverse=True,
+        )
+        from config import PLOTLY_BASE, _AXIS_BASE, _LEGEND_BASE, _MARGIN_BASE
+        fig_evend = go.Figure()
+        for i, vname in enumerate(all_evend):
+            sub     = vend_eagg[vend_eagg["vendor_label"] == vname].set_index("year")
+            all_yrs = sorted(vend_eagg["year"].unique())
+            fig_evend.add_trace(go.Bar(
+                x=all_yrs,
+                y=[float(sub["value_M"].get(y, 0)) for y in all_yrs],
+                name=vname,
+                marker_color=VENDOR_PALETTE_E[i % len(VENDOR_PALETTE_E)],
+                hovertemplate=f"<b>{vname}</b><br>%{{x}}  —  $%{{y:.2f}}M<extra></extra>",
+            ))
+        fig_evend.update_layout(
+            **PLOTLY_BASE, barmode="stack", height=420,
+            margin=dict(**_MARGIN_BASE), legend=dict(**_LEGEND_BASE),
+            title=dict(text="Electricity Spend by Vendor (2010–2024)",
+                       font=dict(size=14, color="#e2e8f0"), x=0),
+            xaxis=dict(**_AXIS_BASE, title="Fiscal Year"),
+            yaxis=dict(**_AXIS_BASE, title="Spend ($M)"),
+        )
+        st.plotly_chart(fig_evend, use_container_width=True)
+
+        st.divider()
+
+        # ── Data table ────────────────────────────────────────────────────────
+        st.markdown("**Electricity Spend by Year ($M)**")
+        elec_tbl = elec_es.rename(columns={"value_M": "Electricity ($M)", "year": "Fiscal Year"})
+        elec_tbl["Electricity ($M)"] = elec_tbl["Electricity ($M)"].round(3)
+        st.dataframe(elec_tbl.sort_values("Fiscal Year", ascending=False),
+                     hide_index=True, use_container_width=True)
+
+        st.divider()
+
+        # ── Excel download ─────────────────────────────────────────────────────
+        st.markdown("#### Download Data")
+        import io
+
+        def _build_excel_fac_spend() -> bytes:
+            buf = io.BytesIO()
+            with pd.ExcelWriter(buf, engine="openpyxl") as xw:
+                elec_tbl.to_excel(xw, sheet_name="Electricity by Year", index=False)
+                vend_elec.rename(columns={"value_M": "Spend ($M)"}).to_excel(
+                    xw, sheet_name="Vendor Level", index=False)
+                wti_hist = pd.DataFrame({
+                    "Date": oc_fa["wti_dates"], "WTI ($/bbl)": oc_fa["wti_prices"],
+                })
+                wti_hist["Date"] = pd.to_datetime(wti_hist["Date"])
+                wti_hist.to_excel(xw, sheet_name="WTI Historical", index=False)
+            return buf.getvalue()
+
+        st.download_button(
+            label="⬇ Download Excel — Electricity Spend + WTI",
+            data=_build_excel_fac_spend(),
+            file_name="chicago_dps_electricity_spend_vs_wti.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+
+        with st.expander("Source & Caveats"):
+            st.markdown("""
+**Data source:** `chicago_energy_clean_strict.xlsx` — consolidated actual spend by vendor,
+extracted from Chicago Data Portal Payments Dataset.
+
+**Scope:** Only electricity spend is available in the payments dataset at vendor level.
+Natural Gas and Fuel Oil actual spend require separate utility billing records.
+Use the Budget Appropriations view for the full facilities energy picture
+(Electricity + Natural Gas + Fuel Oil combined).
+
+**Electricity vendor:** Constellation NewEnergy, Inc. (contracts 29707 and 198906).
+⚠ Includes all Chicago municipal electricity — airports + street lighting (~$22M/yr).
+Isolating DFF/2FM buildings only requires ordinance budget detail.
+
+**Projection:** Ornstein-Uhlenbeck mean-reversion anchored to last actual spend year.
+WTI passthrough factor: 0.15 (electricity grid oil component).
+            """)
+
+
+# ╔═══════════════════════════════════════════════════════════════════════════╗
+# ║  TAB — Oil Price vs Roadways                                             ║
+# ╚═══════════════════════════════════════════════════════════════════════════╝
+if active_tab == "🛣️ Oil Price vs Roadways":
+
+    oil_view_rdw = st.pills(
+        "", ["Budget Appropriations", "Actual Spend"],
+        default="Budget Appropriations", key="oil_view_rdw",
+        label_visibility="collapsed",
+    )
+
+    st.divider()
+
+    st.markdown("""<style>
+[data-testid="stMetric"]{padding:.25rem .5rem!important;background:#ffffff!important;border:1px solid #e2e8f0!important;border-left:3px solid #3b82f6!important;border-radius:8px!important;box-shadow:0 1px 4px rgba(0,0,0,0.06)!important}
+[data-testid="stMetricLabel"] p{font-size:.72rem!important;color:#64748b!important;margin-bottom:.1rem!important}
+[data-testid="stMetricValue"]{font-size:1.05rem!important;color:#0f172a!important}
+[data-testid="stMetricDelta"] svg,[data-testid="stMetricDelta"] p{font-size:.65rem!important}
+[data-testid="stPopover"]>button{background:#f59e0b!important;color:#1e293b!important;
+  border-radius:50%!important;width:26px!important;height:26px!important;min-height:0!important;
+  padding:0!important;font-size:.85rem!important;font-weight:bold!important;border:none!important;
+  line-height:1!important;display:flex!important;align-items:center!important;justify-content:center!important}
+</style>""", unsafe_allow_html=True)
+
+    df_avb, df_act_wt, df_bud_wt, df_rdw_vendor = load_cdot_roadway()
+    oc_rdw = load_oil_correlation()
+
+    from config import PLOTLY_BASE, _AXIS_BASE, _LEGEND_BASE, _MARGIN_BASE
+    import io
+
+    RDWY_PARTIAL_YEAR = 2026
+    RDWY_START        = 2016
+
+    # shared WTI filter
+    _wti_pairs_rdw = [
+        (d, p) for d, p in zip(oc_rdw["wti_dates"], oc_rdw["wti_prices"])
+        if pd.Timestamp(d).year >= RDWY_START
+    ]
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # VIEW A — Budget Appropriations
+    # ══════════════════════════════════════════════════════════════════════════
+    if oil_view_rdw == "Budget Appropriations":
+
+        df_bud = df_avb[
+            (df_avb["YEAR"] >= RDWY_START) & (df_avb["YEAR"] < RDWY_PARTIAL_YEAR)
+        ].copy()
+
+        yr_max_b  = int(df_bud["YEAR"].max())
+        yr_prev_b = yr_max_b - 1
+        bud_max   = float(df_bud.loc[df_bud["YEAR"] == yr_max_b,  "BUDGET"].values[0])
+        bud_prev  = float(df_bud.loc[df_bud["YEAR"] == yr_prev_b, "BUDGET"].values[0])
+        peak_bud  = df_bud.loc[df_bud["BUDGET"].idxmax()]
+
+        # ── Title + info popover ───────────────────────────────────────────────
+        _tc, _ic = st.columns([11, 1])
+        with _tc:
+            st.markdown("### CDOT Roadway Budget vs WTI Crude — FY2016–2025")
+        with _ic:
+            with st.popover("❕"):
+                st.markdown(
+                    "**Source:** `CDOT_Roadway_Actuals_and_Budget_v3.xlsx` — "
+                    "Chicago Annual Budget Ordinance (approved appropriations).  \n"
+                    "**Note:** Budget authority includes multi-year capital program "
+                    "authorizations, typically larger than annual actual spend."
+                )
+
+        k1, k2, k3, k4 = st.columns(4)
+        with k1:
+            st.metric(
+                f"Roadway Budget FY{yr_max_b}", f"${bud_max/1e6:.0f}M",
+                delta=f"{'+'if (bud_max-bud_prev)>=0 else ''}{(bud_max-bud_prev)/1e6:.0f}M vs FY{yr_prev_b}",
+                delta_color="inverse" if (bud_max - bud_prev) > 0 else "normal",
+            )
+        with k2:
+            st.metric(
+                "Peak Budget Year", f"${peak_bud['BUDGET']/1e6:.0f}M",
+                delta=f"FY{int(peak_bud['YEAR'])}", delta_color="off",
+            )
+        with k3:
+            total_bud_16_25 = float(df_bud["BUDGET"].sum())
+            st.metric(
+                "Total Budget FY2016–2025", f"${total_bud_16_25/1e6:.0f}M",
+                delta=f"Avg ${total_bud_16_25/len(df_bud)/1e6:.0f}M/yr", delta_color="off",
+            )
+        with k4:
+            st.metric(
+                "WTI Today", f"${oc_rdw['current_wti']:.2f}/bbl",
+                delta=f"Crisis peak ${oc_rdw['spike_wti']:.0f} (Mar 9)",
+                delta_color="inverse",
+            )
+
+        # ── Run chart ─────────────────────────────────────────────────────────
+        bud_dates  = [pd.Timestamp(f"{y}-01-01") for y in df_bud["YEAR"]]
+        bud_vals   = (df_bud["BUDGET"] / 1e6).tolist()
+        last_bud_M = bud_vals[-1]
+
+        scen_bud = generate_wti_forecast(
+            current_wti=oc_rdw["current_wti"], peak_wti=float(sb_peak_wti),
+            peak_year=sb_peak_yr, halflife_yrs=sb_halflife,
+            long_run_eq=float(sb_lr), sigma=0.22,
+            base_diesel_vol_gal=None, base_elec_M=last_bud_M,
+        )
+        oc_bud_chart = {
+            **oc_rdw,
+            "wti_dates":            [p[0] for p in _wti_pairs_rdw],
+            "wti_prices":           [p[1] for p in _wti_pairs_rdw],
+            "diesel_dates":         bud_dates,
+            "diesel_budget":        [0.0] * len(bud_dates),
+            "elec_dates":           bud_dates,
+            "elec_budget":          bud_vals,
+            "diesel_est_2026_M":    None,
+            "diesel_budget_2026_M": None,
+            **scen_bud,
+        }
+        st.plotly_chart(
+            make_oil_cost_chart(
+                oc_bud_chart,
+                elec_label="Roadway Budget ($M)", elec_proj_label="Roadway Budget Projected",
+                title="CDOT Roadway Budget vs WTI Crude  (2016 – 2033)",
+                x_range=["2016-01-01", "2033-12-31"],
+                show_fleet=False, show_elec=True,
+            ),
+            use_container_width=True,
+        )
+
+        st.divider()
+
+        # ── Budget work type breakdown ─────────────────────────────────────────
+        st.markdown("### Annual Roadway Budget by Work Type")
+
+        _BUD_TYPES = [
+            "General Construction", "Labor & Operations", "Engineering & Design",
+            "Equipment & Maintenance", "Materials & Supplies", "Other Roadway",
+        ]
+        _BUD_COLORS = {
+            "General Construction":  "#7c3aed",
+            "Labor & Operations":    "#0284c7",
+            "Engineering & Design":  "#059669",
+            "Equipment & Maintenance": "#d97706",
+            "Materials & Supplies":  "#db2777",
+            "Other Roadway":         "#64748b",
+        }
+        df_bwt = df_bud_wt[
+            (df_bud_wt["YEAR"] >= RDWY_START) & (df_bud_wt["YEAR"] < RDWY_PARTIAL_YEAR)
+        ].copy()
+        all_years_b = sorted(df_bwt["YEAR"].unique())
+
+        fig_bwt = go.Figure()
+        for btype in _BUD_TYPES:
+            sub = df_bwt[df_bwt["TYPE"] == btype].set_index("YEAR")
+            fig_bwt.add_trace(go.Bar(
+                x=all_years_b,
+                y=[float(sub["TOTAL_BUDGET"].get(y, 0)) / 1e6 for y in all_years_b],
+                name=btype,
+                marker_color=_BUD_COLORS.get(btype, "#94a3b8"),
+                hovertemplate=f"<b>{btype}</b><br>FY%{{x}}  —  $%{{y:.1f}}M<extra></extra>",
+            ))
+        fig_bwt.update_layout(
+            **PLOTLY_BASE, barmode="stack", height=420,
+            margin=dict(**_MARGIN_BASE), legend=dict(**_LEGEND_BASE),
+            title=dict(text="CDOT Roadway Budget by Work Type (FY2016–2025)",
+                       font=dict(size=14, color="#1e293b"), x=0),
+            xaxis=dict(**_AXIS_BASE, title="Fiscal Year", dtick=2),
+            yaxis=dict(**_AXIS_BASE, title="Budget ($M)"),
+        )
+        st.plotly_chart(fig_bwt, use_container_width=True)
+
+        st.divider()
+
+        # ── Budget detail table ────────────────────────────────────────────────
+        st.markdown("**CDOT Roadway Appropriations by Year ($M)**")
+        tbl_bud = df_bud[["YEAR","BUDGET","ACTUALS","VARIANCE","VARIANCE_PCT"]].copy()
+        tbl_bud["BUDGET"]       = (tbl_bud["BUDGET"]   / 1e6).round(1)
+        tbl_bud["ACTUALS"]      = (tbl_bud["ACTUALS"]  / 1e6).round(1)
+        tbl_bud["VARIANCE"]     = (tbl_bud["VARIANCE"] / 1e6).round(1)
+        tbl_bud["VARIANCE_PCT"] = (tbl_bud["VARIANCE_PCT"] * 100).round(1)
+        tbl_bud = tbl_bud.rename(columns={
+            "YEAR": "Fiscal Year", "BUDGET": "Budget ($M)",
+            "ACTUALS": "Actuals ($M)", "VARIANCE": "Variance ($M)",
+            "VARIANCE_PCT": "Variance (%)",
+        }).sort_values("Fiscal Year", ascending=False)
+        st.dataframe(tbl_bud, hide_index=True, use_container_width=True)
+
+        with st.expander("Source & Methodology"):
+            st.markdown(f"""
+**Primary source:** `CDOT_Roadway_Actuals_and_Budget_v3.xlsx` — annual approved appropriations
+from Chicago Annual Budget Ordinance datasets, FY2011–FY2026.
+
+**Budget work types:** General Construction, Labor & Operations, Engineering & Design,
+Equipment & Maintenance, Materials & Supplies, Other Roadway.
+
+**Note on scale:** Budget authority for CDOT roadways reflects multi-year capital program
+authorizations. Annual actuals (payments made) are typically 30–70% of budget authority
+in any given year, as large capital contracts span multiple fiscal years.
+
+**WTI projection:** Ornstein-Uhlenbeck mean-reversion anchored to FY{yr_max_b} budget total.
+Passthrough: 0.15 (infrastructure materials oil component).
+
+**FY2026 excluded** from charts — partial year only.
+            """)
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # VIEW B — Actual Spend
+    # ══════════════════════════════════════════════════════════════════════════
+    else:
+
+        df_act = df_avb[
+            (df_avb["YEAR"] >= RDWY_START) & (df_avb["YEAR"] < RDWY_PARTIAL_YEAR)
+        ].copy()
+
+        yr_max_a  = int(df_act["YEAR"].max())
+        yr_prev_a = yr_max_a - 1
+        act_max   = float(df_act.loc[df_act["YEAR"] == yr_max_a,  "ACTUALS"].values[0])
+        act_prev  = float(df_act.loc[df_act["YEAR"] == yr_prev_a, "ACTUALS"].values[0])
+        peak_act  = df_act.loc[df_act["ACTUALS"].idxmax()]
+        total_act = float(df_act["ACTUALS"].sum())
+
+        # ── Title + info popover ───────────────────────────────────────────────
+        _ts, _is = st.columns([11, 1])
+        with _ts:
+            st.markdown("### CDOT Roadway Actual Spend vs WTI Crude — FY2016–2025")
+        with _is:
+            with st.popover("❕"):
+                st.markdown(
+                    "**Source:** `CDOT_Roadway_Actuals_and_Budget_v3.xlsx` — "
+                    "Chicago Data Portal Payments.csv.  \n"
+                    "**Scope:** All CDOT roadway vendor payments, classified by work type.  \n"
+                    "**FY2026 excluded** — partial year only."
+                )
+
+        k1, k2, k3, k4 = st.columns(4)
+        with k1:
+            st.metric(
+                f"Roadway Spend FY{yr_max_a}", f"${act_max/1e6:.0f}M",
+                delta=f"{'+'if (act_max-act_prev)>=0 else ''}{(act_max-act_prev)/1e6:.0f}M vs FY{yr_prev_a}",
+                delta_color="inverse" if (act_max - act_prev) > 0 else "normal",
+            )
+        with k2:
+            st.metric(
+                "Peak Annual Spend", f"${peak_act['ACTUALS']/1e6:.0f}M",
+                delta=f"FY{int(peak_act['YEAR'])}", delta_color="off",
+            )
+        with k3:
+            st.metric(
+                "Total FY2016–2025", f"${total_act/1e6:.0f}M",
+                delta=f"Avg ${total_act/len(df_act)/1e6:.0f}M/yr", delta_color="off",
+            )
+        with k4:
+            st.metric(
+                "WTI Today", f"${oc_rdw['current_wti']:.2f}/bbl",
+                delta=f"Crisis peak ${oc_rdw['spike_wti']:.0f} (Mar 9)",
+                delta_color="inverse",
+            )
+
+        # ── Run chart ─────────────────────────────────────────────────────────
+        act_dates  = [pd.Timestamp(f"{y}-01-01") for y in df_act["YEAR"]]
+        act_vals   = (df_act["ACTUALS"] / 1e6).tolist()
+        last_act_M = act_vals[-1]
+
+        scen_act = generate_wti_forecast(
+            current_wti=oc_rdw["current_wti"], peak_wti=float(sb_peak_wti),
+            peak_year=sb_peak_yr, halflife_yrs=sb_halflife,
+            long_run_eq=float(sb_lr), sigma=0.22,
+            base_diesel_vol_gal=None, base_elec_M=last_act_M,
+        )
+        oc_act_chart = {
+            **oc_rdw,
+            "wti_dates":            [p[0] for p in _wti_pairs_rdw],
+            "wti_prices":           [p[1] for p in _wti_pairs_rdw],
+            "diesel_dates":         act_dates,
+            "diesel_budget":        [0.0] * len(act_dates),
+            "elec_dates":           act_dates,
+            "elec_budget":          act_vals,
+            "diesel_est_2026_M":    None,
+            "diesel_budget_2026_M": None,
+            **scen_act,
+        }
+        st.plotly_chart(
+            make_oil_cost_chart(
+                oc_act_chart,
+                elec_label="Roadway Spend ($M)", elec_proj_label="Roadway Projected",
+                title="CDOT Roadway Actual Spend vs WTI Crude  (2016 – 2033)",
+                x_range=["2016-01-01", "2033-12-31"],
+                show_fleet=False, show_elec=True,
+            ),
+            use_container_width=True,
+        )
+
+        st.divider()
+
+        # ── Stacked bar: actuals by work type ─────────────────────────────────
+        st.markdown("### Annual Roadway Spend by Work Type")
+
+        _ACT_TYPES_ORDER = [
+            "General Construction", "Other Roadway", "Engineering & Design",
+            "Asphalt Paving", "Signals & Electrical", "Concrete", "Utility / Underground",
+        ]
+        _ACT_COLORS = {
+            "General Construction":  "#7c3aed",
+            "Other Roadway":         "#0284c7",
+            "Engineering & Design":  "#059669",
+            "Asphalt Paving":        "#d97706",
+            "Signals & Electrical":  "#db2777",
+            "Concrete":              "#64748b",
+            "Utility / Underground": "#0891b2",
+        }
+        df_awt = df_act_wt[
+            (df_act_wt["YEAR"] >= RDWY_START) & (df_act_wt["YEAR"] < RDWY_PARTIAL_YEAR)
+        ].copy()
+        all_years_a = sorted(df_awt["YEAR"].unique())
+
+        fig_awt = go.Figure()
+        for atype in _ACT_TYPES_ORDER:
+            sub = df_awt[df_awt["TYPE"] == atype].set_index("YEAR")
+            fig_awt.add_trace(go.Bar(
+                x=all_years_a,
+                y=[float(sub["TOTAL_SPEND"].get(y, 0)) / 1e6 for y in all_years_a],
+                name=atype,
+                marker_color=_ACT_COLORS.get(atype, "#94a3b8"),
+                hovertemplate=f"<b>{atype}</b><br>FY%{{x}}  —  $%{{y:.1f}}M<extra></extra>",
+            ))
+        fig_awt.update_layout(
+            **PLOTLY_BASE, barmode="stack", height=420,
+            margin=dict(**_MARGIN_BASE), legend=dict(**_LEGEND_BASE),
+            title=dict(text="CDOT Roadway Spend by Work Type (FY2016–2025)",
+                       font=dict(size=14, color="#1e293b"), x=0),
+            xaxis=dict(**_AXIS_BASE, title="Fiscal Year", dtick=2),
+            yaxis=dict(**_AXIS_BASE, title="Spend ($M)"),
+        )
+        st.plotly_chart(fig_awt, use_container_width=True)
+
+        st.divider()
+
+        # ── Actuals detail table ───────────────────────────────────────────────
+        st.markdown("**CDOT Roadway Actuals vs Budget by Year ($M)**")
+        tbl_act = df_act[["YEAR","ACTUALS","BUDGET","VARIANCE","VARIANCE_PCT"]].copy()
+        tbl_act["ACTUALS"]      = (tbl_act["ACTUALS"]  / 1e6).round(1)
+        tbl_act["BUDGET"]       = (tbl_act["BUDGET"]   / 1e6).round(1)
+        tbl_act["VARIANCE"]     = (tbl_act["VARIANCE"] / 1e6).round(1)
+        tbl_act["VARIANCE_PCT"] = (tbl_act["VARIANCE_PCT"] * 100).round(1)
+        tbl_act = tbl_act.rename(columns={
+            "YEAR": "Fiscal Year", "ACTUALS": "Actuals ($M)",
+            "BUDGET": "Budget ($M)", "VARIANCE": "Variance ($M)",
+            "VARIANCE_PCT": "Variance (%)",
+        }).sort_values("Fiscal Year", ascending=False)
+        st.dataframe(tbl_act, hide_index=True, use_container_width=True)
+
+        st.divider()
+
+        # ── Excel download ─────────────────────────────────────────────────────
+        st.markdown("#### Download Data")
+
+        def _build_excel_rdw_act() -> bytes:
+            buf = io.BytesIO()
+            with pd.ExcelWriter(buf, engine="openpyxl") as xw:
+                tbl_act.to_excel(xw, sheet_name="Actuals vs Budget", index=False)
+                df_rdw_vendor.rename(columns={
+                    "VENDOR": "Vendor", "TYPE": "Type", "CATEGORY": "Category",
+                    "YEAR": "Fiscal Year", "TOTAL_SPEND": "Total Spend ($)",
+                    "value_M": "Total Spend ($M)",
+                }).to_excel(xw, sheet_name="Vendor Level", index=False)
+                wti_hist = pd.DataFrame({
+                    "Date": oc_rdw["wti_dates"], "WTI ($/bbl)": oc_rdw["wti_prices"],
+                })
+                wti_hist["Date"] = pd.to_datetime(wti_hist["Date"])
+                wti_hist.to_excel(xw, sheet_name="WTI Historical", index=False)
+            return buf.getvalue()
+
+        st.download_button(
+            label="⬇ Download Excel — CDOT Roadway Spend + WTI",
+            data=_build_excel_rdw_act(),
+            file_name="chicago_cdot_roadway_actuals_vs_wti.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+
+        with st.expander("Source & Caveats"):
+            st.markdown(f"""
+**Data source:** `CDOT_Roadway_Actuals_and_Budget_v3.xlsx` — vendor-level payments
+extracted from Chicago Data Portal Payments Dataset (Payments.csv).
+
+**Work type classification (actuals):**
+- **General Construction** — road reconstruction, resurfacing, structural work.
+- **Other Roadway** — miscellaneous roadway maintenance and services.
+- **Engineering & Design** — planning, design, and inspection contracts.
+- **Asphalt Paving** — direct petroleum derivative; high oil price correlation.
+- **Signals & Electrical** — traffic signal installation and electrical work.
+- **Concrete** — portland cement sidewalks, curbs, and structures.
+- **Utility / Underground** — utility relocation and underground infrastructure.
+
+**Oil passthrough (blended ≈0.22):**
+Asphalt (~20% of spend) ≈ 0.55 passthrough (petroleum distillate).
+General Construction (~45%) ≈ 0.15. Remaining types 0.05–0.15.
+
+**WTI projection:** Ornstein-Uhlenbeck mean-reversion anchored to FY{yr_max_a} actuals.
+Passthrough: 0.15.  **FY2026 excluded** — partial year only.
+            """)
+

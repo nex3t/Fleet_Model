@@ -80,24 +80,23 @@ AI_K   = 0.85
 AI_X0  = 3.5
 AI_START_YEAR = 2024
 
-# ── Chart palette — dark naval theme, high contrast ───────────────────────────
-# Card/chart background
-CHART_BG   = "#0d1b2a"   # very dark navy
-CHART_CARD = "#132336"   # slightly lighter card
+# ── Chart palette — light mode, clean slate ───────────────────────────────────
+CHART_BG   = "#f8fafc"   # near-white page
+CHART_CARD = "#ffffff"   # pure white card
 
 _AXIS_BASE = dict(
-    gridcolor="rgba(148,163,184,0.15)",
-    zerolinecolor="rgba(148,163,184,0.25)",
-    linecolor="rgba(148,163,184,0.20)",
-    tickfont=dict(color="#cbd5e1", size=11, family="'Inter', sans-serif"),
-    title_font=dict(color="#e2e8f0", size=12, family="'Inter', sans-serif"),
+    gridcolor="rgba(100,116,139,0.12)",
+    zerolinecolor="rgba(100,116,139,0.25)",
+    linecolor="rgba(100,116,139,0.20)",
+    tickfont=dict(color="#475569", size=11, family="'Inter', sans-serif"),
+    title_font=dict(color="#1e293b", size=12, family="'Inter', sans-serif"),
     tickcolor="#94a3b8",
 )
 _LEGEND_BASE = dict(
-    bgcolor="rgba(13,27,42,0.90)",
-    bordercolor="rgba(148,163,184,0.25)",
+    bgcolor="rgba(248,250,252,0.95)",
+    bordercolor="rgba(100,116,139,0.25)",
     borderwidth=1,
-    font=dict(size=10, color="#e2e8f0"),
+    font=dict(size=10, color="#1e293b"),
     orientation="h",
     y=-0.22, x=0.5,
     xanchor="center", yanchor="top",
@@ -108,10 +107,10 @@ _MARGIN_BASE = dict(l=60, r=24, t=56, b=90)
 PLOTLY_BASE = dict(
     paper_bgcolor=CHART_BG,
     plot_bgcolor=CHART_CARD,
-    font=dict(color="#e2e8f0", family="'Inter', sans-serif", size=11),
+    font=dict(color="#1e293b", family="'Inter', sans-serif", size=11),
     hoverlabel=dict(
-        bgcolor="#1e3a5f",
-        bordercolor="rgba(148,163,184,0.40)",
-        font=dict(color="#f1f5f9", size=12),
+        bgcolor="#1e293b",
+        bordercolor="rgba(100,116,139,0.40)",
+        font=dict(color="#f8fafc", size=12),
     ),
 )

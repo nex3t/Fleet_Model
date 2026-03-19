@@ -13,12 +13,12 @@ from config import (
     PLOTLY_BASE, _AXIS_BASE, _LEGEND_BASE, _MARGIN_BASE,
 )
 
-# Portfolio accent colors — bright on dark background
-_FLEET_COLOR = "#a78bfa"        # violet
-_FAC_COLOR   = "#34d399"        # emerald
-_COMB_COLOR  = "#38bdf8"        # sky blue
-_WARN_COLOR  = "#fb923c"        # orange
-_DANGER_COLOR = "#f87171"       # red
+# Portfolio accent colors — saturated for light background
+_FLEET_COLOR  = "#7c3aed"       # deep violet
+_FAC_COLOR    = "#059669"       # deep emerald
+_COMB_COLOR   = "#0284c7"       # deep sky blue
+_WARN_COLOR   = "#ea580c"       # deep orange
+_DANGER_COLOR = "#dc2626"       # deep red
 
 
 def _apply_base(fig, height=400):
@@ -62,7 +62,7 @@ def make_tornado_chart(fleet_det: pd.DataFrame, fac_det: pd.DataFrame, year: int
         marker_opacity=0.85,
         text=df["Fleet"].apply(lambda v: f"+${v:.1f}M"),
         textposition="outside",
-        textfont=dict(color="#f1f5f9", size=11),
+        textfont=dict(color="#1e293b", size=11),
     ))
     fig.add_trace(go.Bar(
         name="Facilities",
@@ -73,13 +73,13 @@ def make_tornado_chart(fleet_det: pd.DataFrame, fac_det: pd.DataFrame, year: int
         marker_opacity=0.85,
         text=df["Facilities"].apply(lambda v: f"+${v:.1f}M"),
         textposition="outside",
-        textfont=dict(color="#f1f5f9", size=11),
+        textfont=dict(color="#1e293b", size=11),
     ))
     fig.update_layout(
         barmode="stack",
         title=dict(
             text=f"FY{year} — Combined Budget Impact by Scenario",
-            font=dict(size=14, color="#e2e8f0"),
+            font=dict(size=14, color="#1e293b"),
             x=0,
         ),
         xaxis_title="Incremental Cost vs Base ($M)",
@@ -123,7 +123,7 @@ def make_crude_sensitivity_chart(fleet_cs: pd.DataFrame, fac_cs: pd.DataFrame, y
     fig.update_layout(
         title=dict(
             text=f"FY{year} — Incremental Cost per Crude Price Increase",
-            font=dict(size=14, color="#e2e8f0"),
+            font=dict(size=14, color="#1e293b"),
             x=0,
         ),
         xaxis_title="Crude Oil Increase ($/bbl)",
@@ -138,16 +138,16 @@ def make_historic_fuel_chart(hist_df: pd.DataFrame) -> go.Figure:
     """
     cats = ["Motor Vehicle Diesel Fuel", "Electricity", "Fuel Oil", "Alternative Fuel"]
     cat_colors = {
-        "Motor Vehicle Diesel Fuel": "rgba(167,139,250,0.65)",   # violet
-        "Electricity":               "rgba(56,189,248,0.65)",    # sky
-        "Fuel Oil":                  "rgba(251,146,60,0.65)",    # orange
-        "Alternative Fuel":          "rgba(52,211,153,0.65)",    # emerald
+        "Motor Vehicle Diesel Fuel": "rgba(124,58,237,0.65)",   # violet
+        "Electricity":               "rgba(2,132,199,0.65)",    # sky
+        "Fuel Oil":                  "rgba(234,88,12,0.65)",    # orange
+        "Alternative Fuel":          "rgba(5,150,105,0.65)",    # emerald
     }
     cat_line_colors = {
-        "Motor Vehicle Diesel Fuel": "#a78bfa",
-        "Electricity":               "#38bdf8",
-        "Fuel Oil":                  "#fb923c",
-        "Alternative Fuel":          "#34d399",
+        "Motor Vehicle Diesel Fuel": "#7c3aed",
+        "Electricity":               "#0284c7",
+        "Fuel Oil":                  "#ea580c",
+        "Alternative Fuel":          "#059669",
     }
 
     fig = go.Figure()
@@ -166,7 +166,7 @@ def make_historic_fuel_chart(hist_df: pd.DataFrame) -> go.Figure:
     fig.update_layout(
         title=dict(
             text="Historical City Fuel & Utilities Budget (2021–2026)",
-            font=dict(size=14, color="#e2e8f0"),
+            font=dict(size=14, color="#1e293b"),
             x=0,
         ),
         xaxis_title="Fiscal Year",
@@ -186,10 +186,10 @@ def make_fleet_component_chart(fleet_comp: pd.DataFrame, year: int) -> go.Figure
     df = fleet_comp[fleet_comp["Fiscal_Year"] == year].copy()
 
     comp_colors = {
-        "Energy":  "#fb923c",   # orange
-        "PM":      "#a78bfa",   # violet
-        "CM":      "#38bdf8",   # sky
-        "CapEx":   "#34d399",   # emerald
+        "Energy":  "#ea580c",   # orange
+        "PM":      "#7c3aed",   # violet
+        "CM":      "#0284c7",   # sky
+        "CapEx":   "#059669",   # emerald
     }
 
     fig = go.Figure()
@@ -207,14 +207,14 @@ def make_fleet_component_chart(fleet_comp: pd.DataFrame, year: int) -> go.Figure
             marker_opacity=0.85,
             text=df[col].apply(lambda v: f"${v:.0f}M"),
             textposition="inside",
-            textfont=dict(color="#f1f5f9", size=10),
+            textfont=dict(color="#1e293b", size=10),
         ))
 
     fig.update_layout(
         barmode="stack",
         title=dict(
             text=f"FY{year} — Fleet Cost by Component & Scenario",
-            font=dict(size=14, color="#e2e8f0"),
+            font=dict(size=14, color="#1e293b"),
             x=0,
         ),
         xaxis_title="",
@@ -236,9 +236,9 @@ def make_fac_component_chart(fac_det: pd.DataFrame, year: int) -> go.Figure:
 
     fig = go.Figure()
     for label, col, color in [
-        ("Non-Energy O&M",  "NonEnergy_M",   "#34d399"),   # emerald
-        ("Base Energy",     "BaseEnergy_M",  "#fb923c"),   # orange
-        ("Energy Shock Δ",  "EnergyShock_M", "#f87171"),   # red
+        ("Non-Energy O&M",  "NonEnergy_M",   "#059669"),   # emerald
+        ("Base Energy",     "BaseEnergy_M",  "#ea580c"),   # orange
+        ("Energy Shock Δ",  "EnergyShock_M", "#dc2626"),   # red
     ]:
         fig.add_trace(go.Bar(
             name=label,
@@ -248,14 +248,14 @@ def make_fac_component_chart(fac_det: pd.DataFrame, year: int) -> go.Figure:
             marker_opacity=0.85,
             text=df[col].apply(lambda v: f"${v:.0f}M" if v > 1 else ""),
             textposition="inside",
-            textfont=dict(color="#f1f5f9", size=10),
+            textfont=dict(color="#1e293b", size=10),
         ))
 
     fig.update_layout(
         barmode="stack",
         title=dict(
             text=f"FY{year} — Facilities Cost by Component & Scenario",
-            font=dict(size=14, color="#e2e8f0"),
+            font=dict(size=14, color="#1e293b"),
             x=0,
         ),
         xaxis_title="",
@@ -281,11 +281,11 @@ def make_combined_component_chart(fleet_comp: pd.DataFrame, fac_det: pd.DataFram
     for label, col, color in [
         ("Fac Non-Energy",   "NonEnergy_M",   "#1a7a4a"),   # dark emerald
         ("Fac Base Energy",  "BaseEnergy_M",  "#d97706"),   # amber
-        ("Fac Energy Shock", "EnergyShock_M", "#f87171"),   # red
-        ("Fleet CapEx",      "CapEx_M",       "#34d399"),   # emerald
-        ("Fleet CM",         "CM_M",          "#38bdf8"),   # sky
-        ("Fleet PM",         "PM_M",          "#a78bfa"),   # violet
-        ("Fleet Energy",     "Energy_M",      "#fb923c"),   # orange
+        ("Fac Energy Shock", "EnergyShock_M", "#dc2626"),   # red
+        ("Fleet CapEx",      "CapEx_M",       "#059669"),   # emerald
+        ("Fleet CM",         "CM_M",          "#0284c7"),   # sky
+        ("Fleet PM",         "PM_M",          "#7c3aed"),   # violet
+        ("Fleet Energy",     "Energy_M",      "#ea580c"),   # orange
     ]:
         fig.add_trace(go.Bar(
             name=label,
@@ -295,14 +295,14 @@ def make_combined_component_chart(fleet_comp: pd.DataFrame, fac_det: pd.DataFram
             marker_opacity=0.85,
             text=merged[col].apply(lambda v: f"${v:.0f}M" if v > 2 else ""),
             textposition="inside",
-            textfont=dict(color="#f1f5f9", size=9),
+            textfont=dict(color="#1e293b", size=9),
         ))
 
     fig.update_layout(
         barmode="stack",
         title=dict(
             text=f"FY{year} — Combined Cost by Component & Scenario",
-            font=dict(size=14, color="#e2e8f0"),
+            font=dict(size=14, color="#1e293b"),
             x=0,
         ),
         xaxis_title="",
@@ -352,20 +352,20 @@ def make_mc_bands_chart(fleet_mc: pd.DataFrame, fac_mc: pd.DataFrame, portfolio:
                 visible=True,
                 thickness=2.5,
                 width=8,
-                color="rgba(241,245,249,0.70)",
+                color="rgba(30,41,59,0.70)",
             ),
             marker_color=color,
             marker_opacity=0.85,
             text=f"${p50:.0f}M",
             textposition="outside",
-            textfont=dict(color="#f1f5f9", size=12),
+            textfont=dict(color="#1e293b", size=12),
             showlegend=False,
         ))
 
     fig.update_layout(
         title=dict(
             text=f"FY{year} — {portfolio} Total Cost: P10/P50/P95 Bands",
-            font=dict(size=14, color="#e2e8f0"),
+            font=dict(size=14, color="#1e293b"),
             x=0,
         ),
         xaxis_title="",
@@ -397,7 +397,7 @@ def make_budget_at_risk_chart(fleet_mc: pd.DataFrame, fac_mc: pd.DataFrame, year
         marker_opacity=0.85,
         text=[f"${v:.1f}M" for v in f_risk],
         textposition="outside",
-        textfont=dict(color="#f1f5f9", size=11),
+        textfont=dict(color="#1e293b", size=11),
     ))
     fig.add_trace(go.Bar(
         name="Facilities",
@@ -407,12 +407,12 @@ def make_budget_at_risk_chart(fleet_mc: pd.DataFrame, fac_mc: pd.DataFrame, year
         marker_opacity=0.85,
         text=[f"${v:.1f}M" for v in a_risk],
         textposition="outside",
-        textfont=dict(color="#f1f5f9", size=11),
+        textfont=dict(color="#1e293b", size=11),
     ))
     fig.update_layout(
         title=dict(
             text=f"FY{year} — Budget at Risk (P95 − P50) by Scenario",
-            font=dict(size=14, color="#e2e8f0"),
+            font=dict(size=14, color="#1e293b"),
             x=0,
         ),
         xaxis_title="",
@@ -450,7 +450,7 @@ def make_scenario_waterfall(fleet_det: pd.DataFrame, fac_det: pd.DataFrame, year
         y=values,
         text=[f"${v:.0f}M" for v in values],
         textposition="outside",
-        textfont=dict(color="#f1f5f9", size=12),
+        textfont=dict(color="#1e293b", size=12),
         connector=dict(line=dict(color="rgba(148,163,184,0.25)", width=1.5, dash="dot")),
         increasing=dict(marker_color=_DANGER_COLOR),
         decreasing=dict(marker_color=_FAC_COLOR),
@@ -459,7 +459,7 @@ def make_scenario_waterfall(fleet_det: pd.DataFrame, fac_det: pd.DataFrame, year
     fig.update_layout(
         title=dict(
             text=f"FY{year} — Severe Oil Shock Build-Up (Fleet + Facilities)",
-            font=dict(size=14, color="#e2e8f0"),
+            font=dict(size=14, color="#1e293b"),
             x=0,
         ),
         yaxis_title="Cost ($M)",
@@ -531,7 +531,7 @@ def make_mc_scenario_range(fleet_mc: pd.DataFrame, fac_mc: pd.DataFrame, year: i
     fig.update_layout(
         title=dict(
             text=f"FY{year} — Combined Portfolio Risk Range (P10 / P50 / P95)",
-            font=dict(size=14, color="#e2e8f0"), x=0,
+            font=dict(size=14, color="#1e293b"), x=0,
         ),
         yaxis_title="Combined Cost ($M, modeled)",
         xaxis_title="",
@@ -572,7 +572,7 @@ def make_oil_delta_bars(fleet_det: pd.DataFrame, fac_det: pd.DataFrame, year: in
         marker_color="#7c3aed", marker_opacity=0.75,
         text=[f"+${v:.1f}M" if v > 0 else "" for v in f_2nd],
         textposition="inside", insidetextanchor="middle",
-        textfont=dict(color="#e2e8f0", size=9),
+        textfont=dict(color="#1e293b", size=9),
     ))
     fig.add_trace(go.Bar(
         name="Facilities — Energy Utilities",
@@ -586,7 +586,7 @@ def make_oil_delta_bars(fleet_det: pd.DataFrame, fac_det: pd.DataFrame, year: in
     fig.update_layout(
         title=dict(
             text=f"FY{year} — Oil Shock Cost Impact vs Base (Δ Only)",
-            font=dict(size=14, color="#e2e8f0"), x=0,
+            font=dict(size=14, color="#1e293b"), x=0,
         ),
         barmode="stack",
         xaxis_title="Additional Cost vs Base ($M)",
@@ -639,10 +639,10 @@ def make_budget_runchart(data: dict) -> go.Figure:
     fig.add_trace(go.Scatter(
         x=band_x, y=band_y,
         fill="toself",
-        fillcolor="rgba(248,113,113,0.10)",
+        fillcolor="rgba(220,38,38,0.10)",
         line=dict(color="rgba(0,0,0,0)"),
         name="High Risk ±1σ band",
-        showlegend=True,
+        showlegend=False,
         hoverinfo="skip",
     ))
 
@@ -651,8 +651,8 @@ def make_budget_runchart(data: dict) -> go.Figure:
         x=hist_years, y=hist_total,
         name="Historical Actuals",
         mode="lines+markers",
-        line=dict(color="#94a3b8", width=2),
-        marker=dict(size=6, color="#94a3b8"),
+        line=dict(color="#64748b", width=2),
+        marker=dict(size=6, color="#64748b"),
     ))
 
     # Projected — Baseline
@@ -662,6 +662,7 @@ def make_budget_runchart(data: dict) -> go.Figure:
         mode="lines+markers",
         line=dict(color=_COMB_COLOR, width=2.5, dash="dash"),
         marker=dict(size=7, color=_COMB_COLOR),
+        showlegend=False,
     ))
 
     # Projected — High Risk
@@ -671,6 +672,7 @@ def make_budget_runchart(data: dict) -> go.Figure:
         mode="lines+markers",
         line=dict(color=_DANGER_COLOR, width=2.5),
         marker=dict(size=7, color=_DANGER_COLOR),
+        showlegend=False,
     ))
 
     # Projected — Optimized
@@ -680,15 +682,16 @@ def make_budget_runchart(data: dict) -> go.Figure:
         mode="lines+markers",
         line=dict(color=_FAC_COLOR, width=2.5, dash="dot"),
         marker=dict(size=7, color=_FAC_COLOR),
+        showlegend=False,
     ))
 
     # Vertical line: today (FY2026)
     fig.add_vline(
         x=2026, line_width=1.5,
-        line_dash="dot", line_color="rgba(251,146,60,0.70)",
+        line_dash="dot", line_color="rgba(234,88,12,0.70)",
         annotation_text="TODAY (FY2026)",
         annotation_position="top right",
-        annotation_font=dict(color="#fb923c", size=10),
+        annotation_font=dict(color="#ea580c", size=10),
     )
 
     # Vertical line: history / projection break (2024)
@@ -697,7 +700,7 @@ def make_budget_runchart(data: dict) -> go.Figure:
         line_dash="dash", line_color="rgba(148,163,184,0.40)",
         annotation_text="Last Actual",
         annotation_position="top left",
-        annotation_font=dict(color="#94a3b8", size=10),
+        annotation_font=dict(color="#64748b", size=10),
     )
 
     # Annotation: current WTI
@@ -713,7 +716,7 @@ def make_budget_runchart(data: dict) -> go.Figure:
     fig.update_layout(
         title=dict(
             text="DPS Budget Trajectory — Baseline vs High Risk vs Optimized",
-            font=dict(size=14, color="#e2e8f0"),
+            font=dict(size=14, color="#1e293b"),
             x=0,
         ),
         xaxis_title="Fiscal Year",
@@ -746,7 +749,7 @@ def make_savings_gap_chart(data: dict) -> go.Figure:
         marker_opacity=0.80,
         text=[f"+${v:.1f}M" for v in oil_premium],
         textposition="outside",
-        textfont=dict(color="#f1f5f9", size=10),
+        textfont=dict(color="#1e293b", size=10),
     ))
 
     fig.add_trace(go.Bar(
@@ -757,7 +760,7 @@ def make_savings_gap_chart(data: dict) -> go.Figure:
         marker_opacity=0.80,
         text=[f"-${v:.1f}M" for v in opt_savings],
         textposition="outside",
-        textfont=dict(color="#f1f5f9", size=10),
+        textfont=dict(color="#1e293b", size=10),
     ))
 
     fig.add_trace(go.Scatter(
@@ -772,7 +775,7 @@ def make_savings_gap_chart(data: dict) -> go.Figure:
     fig.update_layout(
         title=dict(
             text="Annual Oil Risk Premium vs Optimization Savings",
-            font=dict(size=14, color="#e2e8f0"),
+            font=dict(size=14, color="#1e293b"),
             x=0,
         ),
         xaxis_title="Fiscal Year",
@@ -823,10 +826,10 @@ def make_cost_runchart(data: dict) -> go.Figure:
     fig.add_trace(go.Scatter(
         x=band_x, y=band_y,
         fill="toself",
-        fillcolor="rgba(248,113,113,0.10)",
+        fillcolor="rgba(220,38,38,0.10)",
         line=dict(color="rgba(0,0,0,0)"),
         name="High Risk ±1σ band",
-        showlegend=True,
+        showlegend=False,
         hoverinfo="skip",
     ))
 
@@ -835,8 +838,8 @@ def make_cost_runchart(data: dict) -> go.Figure:
         x=hist_years, y=hist_total,
         name="Total Actual",
         mode="lines+markers",
-        line=dict(color="#94a3b8", width=2.5),
-        marker=dict(size=7, color="#94a3b8"),
+        line=dict(color="#64748b", width=2.5),
+        marker=dict(size=7, color="#64748b"),
         hovertemplate="%{x}  —  $%{y:.2f}M<extra>Total Actual</extra>",
     ))
 
@@ -848,6 +851,7 @@ def make_cost_runchart(data: dict) -> go.Figure:
         line=dict(color=_COMB_COLOR, width=2.5, dash="dash"),
         marker=dict(size=7, color=_COMB_COLOR),
         hovertemplate="%{x}  —  $%{y:.2f}M<extra>Baseline</extra>",
+        showlegend=False,
     ))
 
     # Projected — High Risk
@@ -858,6 +862,7 @@ def make_cost_runchart(data: dict) -> go.Figure:
         line=dict(color=_DANGER_COLOR, width=2.5),
         marker=dict(size=7, color=_DANGER_COLOR),
         hovertemplate="%{x}  —  $%{y:.2f}M<extra>High Risk</extra>",
+        showlegend=False,
     ))
 
     # Projected — Optimized
@@ -868,6 +873,7 @@ def make_cost_runchart(data: dict) -> go.Figure:
         line=dict(color=_FAC_COLOR, width=2.5, dash="dot"),
         marker=dict(size=7, color=_FAC_COLOR),
         hovertemplate="%{x}  —  $%{y:.2f}M<extra>Optimized</extra>",
+        showlegend=False,
     ))
 
     last_actual_yr = hist_years[-1]
@@ -876,14 +882,14 @@ def make_cost_runchart(data: dict) -> go.Figure:
         line_dash="dash", line_color="rgba(148,163,184,0.40)",
         annotation_text="Last Actual",
         annotation_position="top left",
-        annotation_font=dict(color="#94a3b8", size=10),
+        annotation_font=dict(color="#64748b", size=10),
     )
     fig.add_vline(
         x=2026, line_width=1.5,
-        line_dash="dot", line_color="rgba(251,146,60,0.70)",
+        line_dash="dot", line_color="rgba(234,88,12,0.70)",
         annotation_text="TODAY (FY2026)",
         annotation_position="top right",
-        annotation_font=dict(color="#fb923c", size=10),
+        annotation_font=dict(color="#ea580c", size=10),
     )
 
     wti = data.get("current_wti", 107.82)
@@ -898,7 +904,7 @@ def make_cost_runchart(data: dict) -> go.Figure:
     fig.update_layout(
         title=dict(
             text="DPS Energy Cost Trajectory — Fleet Fuel + Electricity (Actual vs Projected)",
-            font=dict(size=14, color="#e2e8f0"),
+            font=dict(size=14, color="#1e293b"),
             x=0,
         ),
         xaxis_title="Fiscal Year",
@@ -930,7 +936,7 @@ def make_cost_breakdown_bar(hist_years: list, hist_fuel: list, hist_elec: list) 
     fig.update_layout(
         title=dict(
             text="Fleet Fuel vs Electricity — Annual Actual Spend",
-            font=dict(size=14, color="#e2e8f0"),
+            font=dict(size=14, color="#1e293b"),
             x=0,
         ),
         xaxis_title="Fiscal Year",
@@ -947,7 +953,9 @@ def make_oil_cost_chart(data: dict,
                         diesel_proj_label: str = "Diesel Projected",
                         elec_proj_label:   str = "Elec Projected",
                         title: str = "WTI Crude vs Diesel & Electricity  (2016 – 2030)",
-                        x_range: list = None) -> go.Figure:
+                        x_range: list = None,
+                        show_fleet: bool = True,
+                        show_elec: bool = True) -> go.Figure:
     """
     Dual-axis line chart with projections (2027-2030):
       Left Y  — WTI crude ($/bbl) monthly historical + EIA forecast dashed + ±1σ band
@@ -995,41 +1003,43 @@ def make_oil_cost_chart(data: dict,
     fig.add_trace(go.Scatter(
         x=wti_proj_mo_dates + wti_proj_mo_dates[::-1],
         y=wti_proj_mo_hi + wti_proj_mo_lo[::-1],
-        fill="toself", fillcolor="rgba(251,146,60,0.12)",
+        fill="toself", fillcolor="rgba(234,88,12,0.12)",
         line=dict(color="rgba(0,0,0,0)"),
-        name="WTI ±1σ band", showlegend=True, hoverinfo="skip",
+        name="WTI ±1σ band", showlegend=False, hoverinfo="skip",
     ), secondary_y=False)
 
     # Diesel ±1σ band (annual, widens with horizon)
     d_px    = [d_bridge_date] + proj_dates
     d_hi_all = [d_bridge_val] + d_hi
     d_lo_all = [d_bridge_val] + d_lo
-    fig.add_trace(go.Scatter(
-        x=d_px + d_px[::-1],
-        y=d_hi_all + d_lo_all[::-1],
-        fill="toself", fillcolor="rgba(167,139,250,0.15)",
-        line=dict(color="rgba(0,0,0,0)"),
-        name="Diesel ±1σ band", showlegend=True, hoverinfo="skip",
-    ), secondary_y=True)
+    if show_fleet:
+        fig.add_trace(go.Scatter(
+            x=d_px + d_px[::-1],
+            y=d_hi_all + d_lo_all[::-1],
+            fill="toself", fillcolor="rgba(124,58,237,0.15)",
+            line=dict(color="rgba(0,0,0,0)"),
+            name="Diesel ±1σ band", showlegend=False, hoverinfo="skip",
+        ), secondary_y=True)
 
     # Electricity ±1σ band
     e_px    = [e_bridge_date] + proj_dates
     e_hi_all = [e_bridge_val] + e_hi
     e_lo_all = [e_bridge_val] + e_lo
-    fig.add_trace(go.Scatter(
-        x=e_px + e_px[::-1],
-        y=e_hi_all + e_lo_all[::-1],
-        fill="toself", fillcolor="rgba(56,189,248,0.13)",
-        line=dict(color="rgba(0,0,0,0)"),
-        name="Elec ±1σ band", showlegend=True, hoverinfo="skip",
-    ), secondary_y=True)
+    if show_elec:
+        fig.add_trace(go.Scatter(
+            x=e_px + e_px[::-1],
+            y=e_hi_all + e_lo_all[::-1],
+            fill="toself", fillcolor="rgba(2,132,199,0.13)",
+            line=dict(color="rgba(0,0,0,0)"),
+            name="Elec ±1σ band", showlegend=False, hoverinfo="skip",
+        ), secondary_y=True)
 
     # ── WTI historical monthly line ───────────────────────────────────────────
     fig.add_trace(go.Scatter(
         x=wti_dates, y=wti_prices,
         name="WTI Crude ($/bbl)",
         mode="lines",
-        line=dict(color="#fb923c", width=2.5),
+        line=dict(color="#ea580c", width=2.5),
         hovertemplate="%{x|%b %Y}  —  $%{y:.1f}/bbl<extra></extra>",
     ), secondary_y=False)
 
@@ -1039,8 +1049,9 @@ def make_oil_cost_chart(data: dict,
         y=[last_wti_price] + wti_proj_mo_base,
         name="WTI EIA Forecast",
         mode="lines",
-        line=dict(color="#fb923c", width=1.8, dash="dash"),
+        line=dict(color="#ea580c", width=1.8, dash="dash"),
         hovertemplate="%{x|%b %Y}  —  $%{y:.1f}/bbl<extra></extra>",
+        showlegend=False,
     ), secondary_y=False)
     # Annual labels on forecast (separate trace, markers only at Jan of each year)
     fig.add_trace(go.Scatter(
@@ -1048,105 +1059,109 @@ def make_oil_cost_chart(data: dict,
         y=wti_base,
         name="WTI forecast labels",
         mode="markers+text",
-        marker=dict(size=6, color="#fb923c"),
+        marker=dict(size=6, color="#ea580c"),
         text=[f"${v:.0f}" for v in wti_base],
         textposition="top center",
-        textfont=dict(color="#fb923c", size=9),
+        textfont=dict(color="#ea580c", size=9),
         showlegend=False,
         hovertemplate="%{x|%Y}  —  $%{y:.1f}/bbl<extra></extra>",
     ), secondary_y=False)
 
-    # ── Diesel line historical ─────────────────────────────────────────────────
-    fig.add_trace(go.Scatter(
-        x=diesel_dates, y=diesel_budget,
-        name=diesel_label,
-        mode="lines+markers+text",
-        line=dict(color="#a78bfa", width=2.5),
-        marker=dict(size=7, color="#a78bfa"),
-        text=[f"${v:.1f}M" for v in diesel_budget],
-        textposition="top center",
-        textfont=dict(color="#a78bfa", size=9),
-        hovertemplate="%{x|%Y}  —  $%{y:.2f}M<extra></extra>",
-    ), secondary_y=True)
-
-    # ── FY2026 estimated actual (overrun marker) ───────────────────────────────
-    est_2026   = data.get("diesel_est_2026_M")
-    bud_2026   = data.get("diesel_budget_2026_M")
-    wti_avg_26 = data.get("wti_2026_avg")
-    mo_count   = data.get("diesel_2026_months", 0)
-    if est_2026 and bud_2026 and est_2026 > bud_2026:
-        overrun = round(est_2026 - bud_2026, 2)
+    # ── Diesel / Fleet line historical ────────────────────────────────────────
+    if show_fleet:
         fig.add_trace(go.Scatter(
-            x=[pd.Timestamp("2026-01-01")],
-            y=[est_2026],
-            name=f"Est. FY2026 Actual (${est_2026:.1f}M)",
-            mode="markers+text",
-            marker=dict(size=13, color="#f87171", symbol="diamond",
-                        line=dict(color="#fff", width=1.5)),
-            text=[f" Est. ${est_2026:.1f}M"],
-            textposition="middle right",
-            textfont=dict(color="#f87171", size=9),
-            hovertemplate=(
-                f"FY2026 Est. Actual: ${est_2026:.2f}M<br>"
-                f"Approved Budget: ${bud_2026:.2f}M<br>"
-                f"Overrun: +${overrun:.2f}M<br>"
-                f"WTI avg ({mo_count}mo + fwd): ${wti_avg_26}/bbl"
-                "<extra></extra>"
-            ),
+            x=diesel_dates, y=diesel_budget,
+            name=diesel_label,
+            mode="lines+markers+text",
+            line=dict(color="#7c3aed", width=2.5),
+            marker=dict(size=7, color="#7c3aed"),
+            text=[f"${v:.1f}M" for v in diesel_budget],
+            textposition="top center",
+            textfont=dict(color="#7c3aed", size=9),
+            hovertemplate="%{x|%Y}  —  $%{y:.2f}M<extra></extra>",
         ), secondary_y=True)
-        # Connector arrow from budget to actual
-        fig.add_annotation(
-            x=pd.Timestamp("2026-01-01"), y=est_2026,
-            ax=pd.Timestamp("2026-01-01"), ay=bud_2026,
-            xref="x", yref="y2", axref="x", ayref="y2",
-            showarrow=True,
-            arrowhead=2, arrowsize=1.2, arrowwidth=1.5,
-            arrowcolor="#f87171",
-            text=f"+${overrun:.1f}M<br>overrun",
-            font=dict(color="#f87171", size=8),
-            align="left",
-        )
 
-    # ── Diesel projection dashed ───────────────────────────────────────────────
-    fig.add_trace(go.Scatter(
-        x=[d_bridge_date] + proj_dates,
-        y=[d_bridge_val] + d_base,
-        name=diesel_proj_label,
-        mode="lines+markers+text",
-        line=dict(color="#a78bfa", width=2, dash="dash"),
-        marker=dict(size=6, color="#a78bfa"),
-        text=[""] + [f"${v:.1f}M" for v in d_base],
-        textposition="top center",
-        textfont=dict(color="#a78bfa", size=9),
-        hovertemplate="%{x|%Y}  —  $%{y:.2f}M<extra></extra>",
-    ), secondary_y=True)
+        # ── FY2026 estimated actual (overrun marker) ─────────────────────────
+        est_2026   = data.get("diesel_est_2026_M")
+        bud_2026   = data.get("diesel_budget_2026_M")
+        wti_avg_26 = data.get("wti_2026_avg")
+        mo_count   = data.get("diesel_2026_months", 0)
+        if est_2026 and bud_2026 and est_2026 > bud_2026:
+            overrun = round(est_2026 - bud_2026, 2)
+            fig.add_trace(go.Scatter(
+                x=[pd.Timestamp("2026-01-01")],
+                y=[est_2026],
+                name=f"Est. FY2026 Actual (${est_2026:.1f}M)",
+                mode="markers+text",
+                marker=dict(size=13, color="#dc2626", symbol="diamond",
+                            line=dict(color="#fff", width=1.5)),
+                text=[f" Est. ${est_2026:.1f}M"],
+                textposition="middle right",
+                textfont=dict(color="#dc2626", size=9),
+                hovertemplate=(
+                    f"FY2026 Est. Actual: ${est_2026:.2f}M<br>"
+                    f"Approved Budget: ${bud_2026:.2f}M<br>"
+                    f"Overrun: +${overrun:.2f}M<br>"
+                    f"WTI avg ({mo_count}mo + fwd): ${wti_avg_26}/bbl"
+                    "<extra></extra>"
+                ),
+            ), secondary_y=True)
+            fig.add_annotation(
+                x=pd.Timestamp("2026-01-01"), y=est_2026,
+                ax=pd.Timestamp("2026-01-01"), ay=bud_2026,
+                xref="x", yref="y2", axref="x", ayref="y2",
+                showarrow=True,
+                arrowhead=2, arrowsize=1.2, arrowwidth=1.5,
+                arrowcolor="#dc2626",
+                text=f"+${overrun:.1f}M<br>overrun",
+                font=dict(color="#dc2626", size=8),
+                align="left",
+            )
 
-    # ── Electricity line historical ────────────────────────────────────────────
-    fig.add_trace(go.Scatter(
-        x=elec_dates, y=elec_budget,
-        name=elec_label,
-        mode="lines+markers+text",
-        line=dict(color="#38bdf8", width=2.5),
-        marker=dict(size=7, color="#38bdf8"),
-        text=[f"${v:.1f}M" for v in elec_budget],
-        textposition="bottom center",
-        textfont=dict(color="#38bdf8", size=9),
-        hovertemplate="%{x|%Y}  —  $%{y:.1f}M<extra></extra>",
-    ), secondary_y=True)
+        # ── Diesel / Fleet projection dashed ─────────────────────────────────
+        fig.add_trace(go.Scatter(
+            x=[d_bridge_date] + proj_dates,
+            y=[d_bridge_val] + d_base,
+            name=diesel_proj_label,
+            mode="lines+markers+text",
+            line=dict(color="#7c3aed", width=2, dash="dash"),
+            marker=dict(size=6, color="#7c3aed"),
+            text=[""] + [f"${v:.1f}M" for v in d_base],
+            textposition="top center",
+            textfont=dict(color="#7c3aed", size=9),
+            hovertemplate="%{x|%Y}  —  $%{y:.2f}M<extra></extra>",
+            showlegend=False,
+        ), secondary_y=True)
 
-    # ── Electricity projection dashed ─────────────────────────────────────────
-    fig.add_trace(go.Scatter(
-        x=[e_bridge_date] + proj_dates,
-        y=[e_bridge_val] + e_base,
-        name=elec_proj_label,
-        mode="lines+markers+text",
-        line=dict(color="#38bdf8", width=2, dash="dash"),
-        marker=dict(size=6, color="#38bdf8"),
-        text=[""] + [f"${v:.1f}M" for v in e_base],
-        textposition="bottom center",
-        textfont=dict(color="#38bdf8", size=9),
-        hovertemplate="%{x|%Y}  —  $%{y:.1f}M<extra></extra>",
-    ), secondary_y=True)
+    # ── Electricity / Facilities line historical ──────────────────────────────
+    if show_elec:
+        fig.add_trace(go.Scatter(
+            x=elec_dates, y=elec_budget,
+            name=elec_label,
+            mode="lines+markers+text",
+            line=dict(color="#0284c7", width=2.5),
+            marker=dict(size=7, color="#0284c7"),
+            text=[f"${v:.1f}M" for v in elec_budget],
+            textposition="bottom center",
+            textfont=dict(color="#0284c7", size=9),
+            hovertemplate="%{x|%Y}  —  $%{y:.1f}M<extra></extra>",
+        ), secondary_y=True)
+
+    # ── Electricity / Facilities projection dashed ────────────────────────────
+    if show_elec:
+        fig.add_trace(go.Scatter(
+            x=[e_bridge_date] + proj_dates,
+            y=[e_bridge_val] + e_base,
+            name=elec_proj_label,
+            mode="lines+markers+text",
+            line=dict(color="#0284c7", width=2, dash="dash"),
+            marker=dict(size=6, color="#0284c7"),
+            text=[""] + [f"${v:.1f}M" for v in e_base],
+            textposition="bottom center",
+            textfont=dict(color="#0284c7", size=9),
+            hovertemplate="%{x|%Y}  —  $%{y:.1f}M<extra></extra>",
+            showlegend=False,
+        ), secondary_y=True)
 
     # ── Crisis peak & today markers ────────────────────────────────────────────
     fig.add_trace(go.Scatter(
@@ -1164,30 +1179,30 @@ def make_oil_cost_chart(data: dict,
         x=[pd.Timestamp("2026-03-10")], y=[current_wti],
         name=f"Today ${current_wti:.0f}",
         mode="markers+text",
-        marker=dict(size=10, color="#34d399", symbol="circle",
+        marker=dict(size=10, color="#059669", symbol="circle",
                     line=dict(color="#fff", width=1)),
         text=[f" ${current_wti:.0f}"], textposition="middle right",
-        textfont=dict(color="#34d399", size=10),
+        textfont=dict(color="#059669", size=10),
         hovertemplate=f"Mar 10: ${current_wti}/bbl<extra></extra>",
     ), secondary_y=False)
 
     # ── Reference lines ────────────────────────────────────────────────────────
     fig.add_hline(
         y=base_wti,
-        line_dash="dot", line_color="rgba(56,189,248,0.35)", line_width=1.5,
+        line_dash="dot", line_color="rgba(2,132,199,0.35)", line_width=1.5,
         annotation_text=f"Model base ${base_wti:.0f}/bbl",
         annotation_position="top right",
-        annotation_font=dict(color="#38bdf8", size=9),
+        annotation_font=dict(color="#0284c7", size=9),
     )
 
     # Today divider
     fig.add_vline(
         x=pd.Timestamp("2026-03-10").timestamp() * 1000,
         line_width=1.5, line_dash="dot",
-        line_color="rgba(52,211,153,0.55)",
+        line_color="rgba(5,150,105,0.55)",
         annotation_text="Today",
         annotation_position="top left",
-        annotation_font=dict(color="#34d399", size=9),
+        annotation_font=dict(color="#059669", size=9),
     )
 
     # Projection start divider
@@ -1197,7 +1212,7 @@ def make_oil_cost_chart(data: dict,
         line_color="rgba(148,163,184,0.30)",
         annotation_text="Projection →",
         annotation_position="top right",
-        annotation_font=dict(color="#94a3b8", size=9),
+        annotation_font=dict(color="#64748b", size=9),
     )
 
     # Event vertical lines
@@ -1218,7 +1233,7 @@ def make_oil_cost_chart(data: dict,
         legend=dict(**_LEGEND_BASE),
         title=dict(
             text=title,
-            font=dict(size=14, color="#e2e8f0"),
+            font=dict(size=14, color="#1e293b"),
             x=0,
         ),
         xaxis=dict(**_AXIS_BASE, title="", tickangle=-30,
@@ -1266,12 +1281,12 @@ def make_actual_vs_budget_chart(actual: dict, budget: dict, title: str,
                   if actual.get(y, {}).get(cat, 0) else ""
                   for y in years],
             textposition="inside",
-            textfont=dict(color="#f1f5f9", size=9),
+            textfont=dict(color="#1e293b", size=9),
         ))
 
     fig.update_layout(
         barmode="group",
-        title=dict(text=title, font=dict(size=14, color="#e2e8f0"), x=0),
+        title=dict(text=title, font=dict(size=14, color="#1e293b"), x=0),
         xaxis_title="Fiscal Year",
         yaxis_title="Spend ($M)",
         xaxis=dict(dtick=1),
@@ -1299,14 +1314,14 @@ def make_actual_summary_chart(rows: list) -> go.Figure:
             marker_opacity=0.85,
             text=sub["value_M"].apply(lambda v: f"${v:.1f}M" if v > 0 else ""),
             textposition="inside",
-            textfont=dict(color="#f1f5f9", size=9),
+            textfont=dict(color="#1e293b", size=9),
         ))
 
     fig.update_layout(
         barmode="stack",
         title=dict(
             text="City of Chicago — DPS Actual Energy Spend by Category (FY2021–2024)",
-            font=dict(size=14, color="#e2e8f0"), x=0,
+            font=dict(size=14, color="#1e293b"), x=0,
         ),
         xaxis_title="Fiscal Year",
         yaxis_title="Actual Spend ($M)",
@@ -1367,7 +1382,7 @@ def make_component_shock_bar(
 
     fig.update_layout(
         barmode="stack",
-        title=dict(text=title, font=dict(size=13, color="#e2e8f0"), x=0),
+        title=dict(text=title, font=dict(size=13, color="#1e293b"), x=0),
         xaxis_title="Cost ($M)",
         yaxis=dict(tickfont=dict(size=10)),
         xaxis=dict(tickfont=dict(size=10)),
