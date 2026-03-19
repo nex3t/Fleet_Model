@@ -163,7 +163,7 @@ st.markdown("""
         background: #ffffff !important;
         border: 1px solid #cbd5e1 !important;
         border-radius: 20px !important;
-        color: #64748b !important;
+        color: #ffffff !important;
         font-family: 'Inter', sans-serif !important;
         font-size: 0.78rem !important;
         font-weight: 500 !important;
@@ -201,16 +201,14 @@ st.markdown("""
     [data-testid="stSidebar"] h3 { color: #0f4c8a !important; }
     [data-testid="stSidebar"] [data-testid="stCaptionContainer"] { color: #94a3b8 !important; }
 
-    /* ── Expander — defined card border ── */
+    /* ── Expander — hide toggle button, always show content ── */
     [data-testid="stExpander"] {
         background: #ffffff !important;
         border: 1px solid #e2e8f0 !important;
         border-radius: 8px !important;
         box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
     }
-    [data-testid="stExpander"] summary,
-    [data-testid="stExpander"] summary p { color: #1d4ed8 !important; font-weight: 500 !important; }
-    [data-testid="stExpander"] summary:hover p { color: #1d6fb8 !important; }
+    [data-testid="stExpander"] summary { display: none !important; }
 
     /* ── Selectbox ── */
     [data-testid="stSelectbox"] > div > div {
@@ -244,6 +242,12 @@ st.markdown("""
 
     /* ── Spinner ── */
     [data-testid="stSpinner"] p { color: #64748b !important; }
+
+    /* ── Hide fullscreen / expand_more button on charts and containers ── */
+    [data-testid="StyledFullScreenButton"],
+    button[title="View fullscreen"],
+    [data-testid="stElementToolbar"],
+    [data-testid="stElementToolbarButton"] { display: none !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -844,7 +848,7 @@ if False and active_tab == "⚡ Fuel Price Sensitivity":  # removed tab
         ac_show.columns = ["Year","Crude Δ ($/bbl)","Energy Δ ($M)"]
         st.dataframe(ac_show[["Crude Δ ($/bbl)","Energy Δ ($M)"]], hide_index=True, use_container_width=True)
 
-    with st.expander("Methodology notes"):
+    with st.expander("Methodology notes", expanded=True):
         st.markdown("""
 **Fleet energy elasticity:** Direct linear scaling (gallons × price/gal).
 PM/materials: 0.18× per unit oil fraction. Corrective/CM: 0.12×. Replacement CapEx: 0.10×.
@@ -951,7 +955,7 @@ if False and active_tab == "📊 Budget Scenarios":  # removed tab
     show.columns = ["Scenario","P10 ($M)","P50 ($M)","P95 ($M)","Budget at Risk ($M)","Δ vs Base ($M)"]
     st.dataframe(show, hide_index=True, use_container_width=True)
 
-    with st.expander("Monte Carlo model assumptions"):
+    with st.expander("Monte Carlo model assumptions", expanded=True):
         st.markdown(f"""
 **Fleet MC (125 runs):** Pre-computed from Weibull failure model.
 Asset failure times drawn from Weibull(k=3.0, λ=useful_life×1.15).
@@ -1032,7 +1036,7 @@ if False:
     })
     st.dataframe(proj_df, hide_index=True, use_container_width=True)
 
-    with st.expander("Scenario definitions"):
+    with st.expander("Scenario definitions", expanded=True):
         st.markdown(f"""
 **Baseline:** Budget plan trajectory from Facilities `fact_savings` + Fleet pre-computed simulation.
 No additional oil shock assumed beyond current budget base ($4.10/gal diesel).
@@ -1346,7 +1350,7 @@ if active_tab == "🔩 Component Exposure":
             use_container_width=True,
         )
 
-    with st.expander("Passthrough factor methodology"):
+    with st.expander("Passthrough factor methodology", expanded=True):
         st.markdown(f"""
 **Oil passthrough factors** estimate how much of a 1% increase in WTI crude translates
 to a cost increase in each component. Applied as: `delta = base_cost × passthrough × shock_pct`.
@@ -1404,17 +1408,7 @@ if active_tab == "🛢️ Oil Price vs Fleet":
         yr_max  = int(fleet_series.index.max())
         yr_prev = yr_max - 1
 
-        # ── Title + info popover ───────────────────────────────────────────────
-        _tc, _ic = st.columns([11, 1])
-        with _tc:
-            st.markdown("### Fleet Fuel Budget vs WTI Crude — FY2016–2025")
-        with _ic:
-            with st.popover("❕"):
-                st.markdown(
-                    "**Source:** `chicago_energy_budget_2016_2025.xlsx` — annual appropriations "
-                    "by account from Chicago Data Portal (Budget Ordinance datasets).  \n"
-                    "**Fleet accounts:** Motor Vehicle Diesel Fuel, Motor Vehicle Gasoline, Alternative Fuel."
-                )
+        st.markdown("### Fleet Fuel Budget vs WTI Crude — FY2016–2025")
 
         k1, k2, k3 = st.columns(3)
         with k1:
@@ -1491,7 +1485,7 @@ if active_tab == "🛢️ Oil Price vs Fleet":
             pivot[col] = pivot[col].round(3)
         st.dataframe(pivot, hide_index=True, use_container_width=True)
 
-        with st.expander("Source & Methodology"):
+        with st.expander("Source & Methodology", expanded=True):
             st.markdown(f"""
 **Primary source:** `chicago_energy_budget_2016_2025.xlsx` — annual appropriations downloaded from
 Chicago Data Portal (Budget Ordinance - Appropriations datasets, FY2016–FY2025).
@@ -1514,17 +1508,7 @@ fleet appropriation as base volume. Passthrough: `$0.024/gal per $/bbl WTI`.
         fuel_es, _elec  = load_energy_spend()
         vend_df         = load_vendor_detail()
 
-        # ── Title + info popover ───────────────────────────────────────────────
-        _ts, _is = st.columns([11, 1])
-        with _ts:
-            st.markdown("### Fleet Fuel Actual Spend vs WTI Crude — Payments Dataset")
-        with _is:
-            with st.popover("❕"):
-                st.markdown(
-                    "**Source:** `chicago_energy_clean_strict.xlsx` — Chicago Data Portal Payments.  \n"
-                    "**Fleet fuel:** Colonial Oil Industries (contracts 129971 diesel + 129972 gasoline).  \n"
-                    "Historical coverage: 2002–2024 (partial years excluded)."
-                )
+        st.markdown("### Fleet Fuel Actual Spend vs WTI Crude — Payments Dataset")
 
         # ── KPI banner ────────────────────────────────────────────────────────
         recent_fuel   = fuel_es[fuel_es["year"] >= 2021]
@@ -1674,7 +1658,7 @@ fleet appropriation as base volume. Passthrough: `$0.024/gal per $/bbl WTI`.
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
 
-        with st.expander("Source & Caveats"):
+        with st.expander("Source & Caveats", expanded=True):
             st.markdown("""
 **Data source:** `chicago_energy_clean_strict.xlsx` — consolidated actual spend by vendor,
 extracted from Chicago Data Portal Payments Dataset.
@@ -1731,17 +1715,7 @@ if active_tab == "🏢 Oil Price vs Facilities":
         yr_max  = int(fac_series.index.max())
         yr_prev = yr_max - 1
 
-        # ── Title + info popover ───────────────────────────────────────────────
-        _tc, _ic = st.columns([11, 1])
-        with _tc:
-            st.markdown("### Facilities Energy Budget vs WTI Crude — FY2016–2025")
-        with _ic:
-            with st.popover("❕"):
-                st.markdown(
-                    "**Source:** `chicago_energy_budget_2016_2025.xlsx` — annual appropriations "
-                    "from Chicago Data Portal (Budget Ordinance datasets).  \n"
-                    "**Facilities accounts:** Electricity, Natural Gas, Fuel Oil."
-                )
+        st.markdown("### Facilities Energy Budget vs WTI Crude — FY2016–2025")
 
         k1, k2, k3, k4 = st.columns(4)
         with k1:
@@ -1824,7 +1798,7 @@ if active_tab == "🏢 Oil Price vs Facilities":
             pivot_fac[col] = pivot_fac[col].round(3)
         st.dataframe(pivot_fac, hide_index=True, use_container_width=True)
 
-        with st.expander("Source & Methodology"):
+        with st.expander("Source & Methodology", expanded=True):
             st.markdown(f"""
 **Primary source:** `chicago_energy_budget_2016_2025.xlsx` — annual appropriations downloaded from
 Chicago Data Portal (Budget Ordinance - Appropriations datasets, FY2016–FY2025).
@@ -1849,19 +1823,7 @@ facilities total as base value. WTI passthrough factor: 0.15 (electricity grid c
         _fuel, elec_es  = load_energy_spend()
         vend_df         = load_vendor_detail()
 
-        # ── Title + info popover ───────────────────────────────────────────────
-        _ts, _is = st.columns([11, 1])
-        with _ts:
-            st.markdown("### Facilities Electricity Actual Spend vs WTI Crude")
-        with _is:
-            with st.popover("❕"):
-                st.markdown(
-                    "**Source:** `chicago_energy_clean_strict.xlsx` — Chicago Data Portal Payments.  \n"
-                    "**Note:** Only electricity is captured in the payments dataset. "
-                    "Natural Gas and Fuel Oil actual spend is not available at this granularity — "
-                    "use Budget Appropriations view for the full facilities picture.  \n"
-                    "**Vendor:** Constellation NewEnergy, Inc."
-                )
+        st.markdown("### Facilities Electricity Actual Spend vs WTI Crude")
 
         # ── KPI banner ────────────────────────────────────────────────────────
         recent_elec   = elec_es[elec_es["year"] >= 2021]
@@ -2010,7 +1972,7 @@ facilities total as base value. WTI passthrough factor: 0.15 (electricity grid c
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
 
-        with st.expander("Source & Caveats"):
+        with st.expander("Source & Caveats", expanded=True):
             st.markdown("""
 **Data source:** `chicago_energy_clean_strict.xlsx` — consolidated actual spend by vendor,
 extracted from Chicago Data Portal Payments Dataset.
@@ -2083,18 +2045,7 @@ if active_tab == "🛣️ Oil Price vs Roadways":
         bud_prev  = float(df_bud.loc[df_bud["YEAR"] == yr_prev_b, "BUDGET"].values[0])
         peak_bud  = df_bud.loc[df_bud["BUDGET"].idxmax()]
 
-        # ── Title + info popover ───────────────────────────────────────────────
-        _tc, _ic = st.columns([11, 1])
-        with _tc:
-            st.markdown("### CDOT Roadway Budget vs WTI Crude — FY2016–2025")
-        with _ic:
-            with st.popover("❕"):
-                st.markdown(
-                    "**Source:** `CDOT_Roadway_Actuals_and_Budget_v3.xlsx` — "
-                    "Chicago Annual Budget Ordinance (approved appropriations).  \n"
-                    "**Note:** Budget authority includes multi-year capital program "
-                    "authorizations, typically larger than annual actual spend."
-                )
+        st.markdown("### CDOT Roadway Budget vs WTI Crude — FY2016–2025")
 
         k1, k2, k3, k4 = st.columns(4)
         with k1:
@@ -2213,7 +2164,7 @@ if active_tab == "🛣️ Oil Price vs Roadways":
         }).sort_values("Fiscal Year", ascending=False)
         st.dataframe(tbl_bud, hide_index=True, use_container_width=True)
 
-        with st.expander("Source & Methodology"):
+        with st.expander("Source & Methodology", expanded=True):
             st.markdown(f"""
 **Primary source:** `CDOT_Roadway_Actuals_and_Budget_v3.xlsx` — annual approved appropriations
 from Chicago Annual Budget Ordinance datasets, FY2011–FY2026.
@@ -2247,18 +2198,7 @@ Passthrough: 0.15 (infrastructure materials oil component).
         peak_act  = df_act.loc[df_act["ACTUALS"].idxmax()]
         total_act = float(df_act["ACTUALS"].sum())
 
-        # ── Title + info popover ───────────────────────────────────────────────
-        _ts, _is = st.columns([11, 1])
-        with _ts:
-            st.markdown("### CDOT Roadway Actual Spend vs WTI Crude — FY2016–2025")
-        with _is:
-            with st.popover("❕"):
-                st.markdown(
-                    "**Source:** `CDOT_Roadway_Actuals_and_Budget_v3.xlsx` — "
-                    "Chicago Data Portal Payments.csv.  \n"
-                    "**Scope:** All CDOT roadway vendor payments, classified by work type.  \n"
-                    "**FY2026 excluded** — partial year only."
-                )
+        st.markdown("### CDOT Roadway Actual Spend vs WTI Crude — FY2016–2025")
 
         k1, k2, k3, k4 = st.columns(4)
         with k1:
@@ -2405,7 +2345,7 @@ Passthrough: 0.15 (infrastructure materials oil component).
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
 
-        with st.expander("Source & Caveats"):
+        with st.expander("Source & Caveats", expanded=True):
             st.markdown(f"""
 **Data source:** `CDOT_Roadway_Actuals_and_Budget_v3.xlsx` — vendor-level payments
 extracted from Chicago Data Portal Payments Dataset (Payments.csv).

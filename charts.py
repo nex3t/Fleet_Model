@@ -990,6 +990,21 @@ def make_oil_cost_chart(data: dict,
 
     fig = make_subplots(specs=[[{"secondary_y": True}]])
 
+    # ── Right-axis ceiling: 115% of the max value across historical + projected ─
+    # ── Axis ceilings: 115% of the max value in historical + projected hi ────
+    _wti_ceil = max(
+        [v for v in wti_prices if v] + wti_proj_mo_hi
+    ) * 1.15
+
+    _right_vals = (
+        ([v for v in diesel_budget if v] if show_fleet else []) +
+        ([v for v in elec_budget   if v] if show_elec  else []) +
+        (d_hi if show_fleet else []) +
+        (e_hi if show_elec  else [])
+    )
+    _right_max = max(_right_vals) if _right_vals else 1.0
+    _right_ceil = _right_max * 1.15
+
     # Bridge last historical point → first projected (for continuous lines)
     last_wti_date   = wti_dates[-1]
     last_wti_price  = float(wti_prices[-1])
@@ -1238,9 +1253,10 @@ def make_oil_cost_chart(data: dict,
         ),
         xaxis=dict(**_AXIS_BASE, title="", tickangle=-30,
                    **( {"range": x_range} if x_range else {} )),
-        yaxis=dict(**_AXIS_BASE,  title="WTI Crude ($/bbl)"),
+        yaxis=dict(**_AXIS_BASE,  title="WTI Crude ($/bbl)", range=[0, _wti_ceil]),
         yaxis2=dict(**_AXIS_BASE, title="Budget ($M)",
-                    overlaying="y", side="right", showgrid=False),
+                    overlaying="y", side="right", showgrid=False,
+                    range=[0, _right_ceil]),
     )
     return fig
 
