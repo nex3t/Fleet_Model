@@ -2034,6 +2034,8 @@ if active_tab == "🛣️ Oil Price vs Roadways":
 
     RDWY_PARTIAL_YEAR = 2026
     RDWY_START        = 2016
+    _RDWY_PASS        = 0.22
+    _PROJ_YRS_RDW     = [2027, 2028, 2029, 2030, 2031, 2032, 2033]
 
     # shared WTI filter
     _wti_pairs_rdw = [
@@ -2095,9 +2097,6 @@ if active_tab == "🛣️ Oil Price vs Roadways":
             base_diesel_vol_gal=None, base_elec_M=last_bud_M,
         )
         # Roadway projection: OLS trend extrapolation + oil passthrough
-        _RDWY_PASS     = 0.22
-        _PROJ_YRS_RDW  = [2027, 2028, 2029, 2030, 2031, 2032, 2033]
-
         _bud_hist_y  = np.array(df_bud["YEAR"].tolist(), dtype=float)
         _bud_hist_v  = np.array((df_bud["BUDGET"] / 1e6).tolist(), dtype=float)
         _bud_slope, _bud_icept = np.polyfit(_bud_hist_y, _bud_hist_v, 1)
@@ -2349,6 +2348,77 @@ Passthrough: 0.15 (infrastructure materials oil component).
             yaxis=dict(**_AXIS_BASE, title="Spend ($M)"),
         )
         st.plotly_chart(fig_awt, use_container_width=True)
+
+        st.divider()
+
+        # ── Top Vendors chart ──────────────────────────────────────────────────
+        st.markdown("### Top CDOT Roadway Vendors by Actual Spend")
+
+        _VENDOR_COLORS = {
+            "General Construction":  "#7c3aed",
+            "Other Roadway":         "#0284c7",
+            "Engineering & Design":  "#059669",
+            "Asphalt Paving":        "#d97706",
+            "Signals & Electrical":  "#db2777",
+            "Concrete":              "#64748b",
+            "Utility / Underground": "#0891b2",
+        }
+
+        df_vnd = df_rdw_vendor[
+            (df_rdw_vendor["YEAR"] >= RDWY_START) & (df_rdw_vendor["YEAR"] < RDWY_PARTIAL_YEAR)
+        ].copy()
+
+        _vc1, _vc2 = st.columns([1, 3])
+        with _vc1:
+            _top_n = st.selectbox("Top N vendors", [10, 15, 20, 25], index=1, key="rdw_top_n")
+            _vnd_types = sorted(df_vnd["TYPE"].dropna().unique().tolist())
+            _sel_types = st.multiselect("Work types", _vnd_types, default=_vnd_types, key="rdw_vnd_types")
+
+        df_vnd_filt = df_vnd[df_vnd["TYPE"].isin(_sel_types)] if _sel_types else df_vnd
+
+        _vnd_totals = (
+            df_vnd_filt.groupby(["VENDOR", "TYPE"])["TOTAL_SPEND"]
+            .sum()
+            .reset_index()
+            .rename(columns={"TOTAL_SPEND": "TOTAL"})
+        )
+        _top_vendors = (
+            _vnd_totals.groupby("VENDOR")["TOTAL"].sum()
+            .nlargest(_top_n).index.tolist()
+        )
+        _vnd_plot = _vnd_totals[_vnd_totals["VENDOR"].isin(_top_vendors)].copy()
+        _vnd_plot["TOTAL_M"] = _vnd_plot["TOTAL"] / 1e6
+
+        # sort by total descending
+        _vnd_order = (
+            _vnd_plot.groupby("VENDOR")["TOTAL_M"].sum()
+            .sort_values().index.tolist()
+        )
+
+        fig_vnd = go.Figure()
+        for vtype in _sel_types:
+            sub = _vnd_plot[_vnd_plot["TYPE"] == vtype].set_index("VENDOR")
+            fig_vnd.add_trace(go.Bar(
+                y=_vnd_order,
+                x=[float(sub["TOTAL_M"].get(v, 0)) for v in _vnd_order],
+                name=vtype,
+                orientation="h",
+                marker_color=_VENDOR_COLORS.get(vtype, "#94a3b8"),
+                hovertemplate=f"<b>{vtype}</b><br>%{{y}}<br>${{x:.1f}}M<extra></extra>",
+            ))
+        fig_vnd.update_layout(
+            **PLOTLY_BASE, barmode="stack",
+            height=max(350, _top_n * 28),
+            margin=dict(l=200, r=20, t=40, b=40),
+            legend=dict(**_LEGEND_BASE),
+            title=dict(
+                text=f"Top {_top_n} CDOT Roadway Vendors — Total Spend FY{RDWY_START}–{RDWY_PARTIAL_YEAR - 1}",
+                font=dict(size=14, color="#1e293b"), x=0,
+            ),
+            xaxis=dict(**_AXIS_BASE, title="Total Spend ($M)"),
+            yaxis=dict(**_AXIS_BASE, title=""),
+        )
+        st.plotly_chart(fig_vnd, use_container_width=True)
 
         st.divider()
 
